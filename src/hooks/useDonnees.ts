@@ -116,6 +116,9 @@ export function usePortefeuille() {
   return { ...donnees, chargement, erreur, recharger: charger }
 }
 
+/** Portefeuille + état de chargement, tel que consommé par les écrans. */
+export type PortefeuilleComplet = ReturnType<typeof usePortefeuille>
+
 /* ------------------------------------------------------------------ */
 /* Dossier d'un camion                                                 */
 /* ------------------------------------------------------------------ */
