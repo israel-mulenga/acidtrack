@@ -332,14 +332,22 @@ export function Encart({
   titre,
   children,
   icone,
+  className,
 }: {
   ton?: keyof typeof STYLE_ENCART
   titre?: string
   children?: ReactNode
   icone?: ReactNode
+  className?: string
 }) {
   return (
-    <div className={cn('flex gap-2.5 rounded-lg border px-3.5 py-3 text-sm', STYLE_ENCART[ton])}>
+    <div
+      className={cn(
+        'flex gap-2.5 rounded-lg border px-3.5 py-3 text-sm',
+        STYLE_ENCART[ton],
+        className,
+      )}
+    >
       {icone && <span className="mt-0.5 shrink-0">{icone}</span>}
       <div className="min-w-0">
         {titre && <p className="font-semibold">{titre}</p>}

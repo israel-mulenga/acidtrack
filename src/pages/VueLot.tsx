@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ChevronLeft, Filter, Package } from 'lucide-react'
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
-import { estEnRetard, progressionLot, tonnage } from '@/lib/workflow'
+import { progressionLot, tonnage } from '@/lib/workflow'
 import { cn, formatDate, formatTonnage } from '@/lib/utils'
 import { Carte, EtatVide, Progression, Squelette } from '@/components/ui'
 import { CarteCamion } from '@/components/CarteCamion'
@@ -42,15 +42,17 @@ export function VueLot({ portefeuille }: { portefeuille: PortefeuilleComplet }) 
   const camions = portefeuille.camions.filter((c) => c.lot_id === lot.id)
   const progression = progressionLot(camions)
 
+  const referentiel = portefeuille.etapesDuLot(lot)
+
   const camionsFiltres = camions.filter((c) => {
     if (filtre === 'exceptions')
-      return c.statut === 'BLOQUE' || estEnRetard(c, portefeuille.referentiel)
+      return c.statut === 'BLOQUE' || portefeuille.camionEnRetard(c)
     if (filtre === 'termines') return c.statut === 'TERMINE'
     return true
   })
 
   const nbExceptions = camions.filter(
-    (c) => c.statut === 'BLOQUE' || estEnRetard(c, portefeuille.referentiel),
+    (c) => c.statut === 'BLOQUE' || portefeuille.camionEnRetard(c),
   ).length
 
   const filtres: { cle: Filtre; libelle: string; compte: number }[] = [
@@ -141,7 +143,7 @@ export function VueLot({ portefeuille }: { portefeuille: PortefeuilleComplet }) 
               key={camion.id}
               camion={camion}
               lot={lot}
-              referentiel={portefeuille.referentiel}
+              referentiel={referentiel}
             />
           ))}
         </div>

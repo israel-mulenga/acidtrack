@@ -22,7 +22,6 @@ import type {
   Document,
   EtapeEvenement,
   EtapeReferentiel,
-  Lot,
   RoleUtilisateur,
 } from '@/lib/types'
 import {
@@ -54,7 +53,7 @@ export function ModaleEtape({
   ouverte,
   onFermer,
   camion,
-  lot,
+  jalons,
   etape,
   documents,
   dernierEvenement,
@@ -66,7 +65,8 @@ export function ModaleEtape({
   ouverte: boolean
   onFermer: () => void
   camion: Camion
-  lot: Lot
+  /** Points de contrôle de l'itinéraire du lot (masquage AC-06). */
+  jalons: string[]
   etape: EtapeReferentiel
   documents: Document[]
   dernierEvenement?: EtapeEvenement
@@ -235,7 +235,7 @@ export function ModaleEtape({
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {etape.champs.map((champ) => {
             const id = `champ-${champ.cle}`
-            const options = optionsChamp(champ.cle, champ.options, lot.destination)
+            const options = optionsChamp(champ.cle, champ.options, jalons)
             return (
               <div
                 key={champ.cle}

@@ -5,7 +5,7 @@
 
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
 import { CheckCircle2, ListTodo } from 'lucide-react'
-import { estEnRetard, heuresDepuis } from '@/lib/workflow'
+import { heuresDepuis } from '@/lib/workflow'
 import { EtatVide, Squelette } from '@/components/ui'
 import { CarteCamion } from '@/components/CarteCamion'
 import { IndicateurTempsReel } from '@/components/Coquille'
@@ -21,7 +21,7 @@ export function MesTaches({ portefeuille }: { portefeuille: PortefeuilleComplet 
     )
   }
 
-  const { camions, lots, referentiel, evenementsAValider } = portefeuille
+  const { camions, lots, evenementsAValider } = portefeuille
 
   const enAttenteValidation = new Set(evenementsAValider.map((e) => e.camion_id))
 
@@ -35,10 +35,10 @@ export function MesTaches({ portefeuille }: { portefeuille: PortefeuilleComplet 
     )
     .sort((a, b) => {
       // Bloqués puis retards puis les plus anciens sans mise à jour
-      const score = (id: typeof a) =>
-        (id.statut === 'BLOQUE' ? 2000 : 0) +
-        (estEnRetard(id, referentiel) ? 1000 : 0) +
-        heuresDepuis(id.derniere_maj_at)
+      const score = (c: typeof a) =>
+        (c.statut === 'BLOQUE' ? 2000 : 0) +
+        (portefeuille.camionEnRetard(c) ? 1000 : 0) +
+        heuresDepuis(c.derniere_maj_at)
       return score(b) - score(a)
     })
 
@@ -73,7 +73,7 @@ export function MesTaches({ portefeuille }: { portefeuille: PortefeuilleComplet 
                 key={camion.id}
                 camion={camion}
                 lot={lots.find((l) => l.id === camion.lot_id)}
-                referentiel={referentiel}
+                referentiel={portefeuille.etapesDuCamion(camion)}
               />
             ))}
           </div>
@@ -91,7 +91,7 @@ export function MesTaches({ portefeuille }: { portefeuille: PortefeuilleComplet 
                 key={camion.id}
                 camion={camion}
                 lot={lots.find((l) => l.id === camion.lot_id)}
-                referentiel={referentiel}
+                referentiel={portefeuille.etapesDuCamion(camion)}
               />
             ))}
           </div>

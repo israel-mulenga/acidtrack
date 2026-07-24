@@ -38,6 +38,13 @@ npm run dev
 2. Dans **SQL Editor**, exécuter dans l'ordre :
    - `supabase/01_schema.sql` — tables, types, RLS, trigger, bucket de stockage
    - `supabase/02_seed.sql` — jeu de démonstration (1 commande, 2 lots, 5 camions)
+   - `supabase/03_crud.sql` — référentiel paramétrable (points de chargement,
+     itinéraires, modèles d'étapes) et rattachement des lots
+
+   > `03_crud.sql` remplace la table figée `etapes_referentiel` par des
+   > modèles d'étapes éditables depuis l'application. Une fois la migration
+   > passée, ne rejouez plus `02_seed.sql` : relancez `01`, `02` puis `03`
+   > dans l'ordre si vous repartez d'une base vierge.
 3. Dans **Project Settings → API**, copier `Project URL` et la clé `anon public`
    dans `.env.local`.
 
@@ -78,9 +85,11 @@ src/
   hooks/          Accès aux données Supabase
   lib/            Types, règles métier (workflow.ts), utilitaires
   pages/          Écrans par profil
+  pages/admin/    Écrans de création et d'édition du référentiel
 supabase/
   01_schema.sql   Schéma, RLS, trigger, bucket
   02_seed.sql     Données de démonstration
+  03_crud.sql     Référentiel paramétrable et index
 ```
 
 Toute la logique dérivée (progression, SLA, statut d'étape, complétude

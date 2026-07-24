@@ -1,18 +1,25 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { AlertTriangle, Eye, LayoutDashboard, Package, Truck } from 'lucide-react'
+import { AlertTriangle, Eye, LayoutDashboard, Package, Settings, Truck } from 'lucide-react'
 import { usePortefeuille } from '@/hooks/useDonnees'
 import { useSession } from '@/session'
 import { Coquille } from '@/components/Coquille'
 import { Encart } from '@/components/ui'
-import { TourDeControle, nombreExceptions } from '@/pages/TourDeControle'
+import { TourDeControle } from '@/pages/TourDeControle'
 import { VueLot } from '@/pages/VueLot'
 import { FicheCamion } from '@/pages/FicheCamion'
 import { PortailClient } from '@/pages/PortailClient'
 import { MesTaches } from '@/pages/MesTaches'
+import { Administration } from '@/pages/Administration'
 
 export default function App() {
   const portefeuille = usePortefeuille()
-  const { estClient, profil } = useSession()
+  const { estClient, profil, peut } = useSession()
+
+  const ongletAdmin = {
+    vers: '/administration',
+    libelle: 'Administration',
+    icone: <Settings className="size-5 sm:size-4" />,
+  }
 
   // La navigation dépend du profil : le client n'accède qu'à son portail.
   const onglets = estClient
@@ -24,7 +31,7 @@ export default function App() {
             vers: '/controle',
             libelle: 'Tour de contrôle',
             icone: <LayoutDashboard className="size-5 sm:size-4" />,
-            pastille: nombreExceptions(portefeuille),
+            pastille: portefeuille.nbExceptions,
           },
         ]
       : [
@@ -32,9 +39,12 @@ export default function App() {
             vers: '/',
             libelle: 'Tour de contrôle',
             icone: <LayoutDashboard className="size-5 sm:size-4" />,
-            pastille: nombreExceptions(portefeuille),
+            pastille: portefeuille.nbExceptions,
           },
           { vers: '/taches', libelle: 'Mes tâches', icone: <Package className="size-5 sm:size-4" /> },
+          ...(peut('administrer_commercial') || peut('administrer_referentiel')
+            ? [ongletAdmin]
+            : []),
         ]
 
   return (
@@ -73,6 +83,10 @@ export default function App() {
             <Route path="/taches" element={<MesTaches portefeuille={portefeuille} />} />
             <Route path="/lots/:id" element={<VueLot portefeuille={portefeuille} />} />
             <Route path="/camions/:id" element={<FicheCamion portefeuille={portefeuille} />} />
+            <Route
+              path="/administration"
+              element={<Administration portefeuille={portefeuille} />}
+            />
           </>
         )}
         <Route path="*" element={<Navigate to="/" replace />} />

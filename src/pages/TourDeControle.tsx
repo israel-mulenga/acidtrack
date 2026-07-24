@@ -14,7 +14,7 @@ import {
   Truck,
 } from 'lucide-react'
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
-import { estEnRetard, progressionLot, tonnage } from '@/lib/workflow'
+import { progressionLot, tonnage } from '@/lib/workflow'
 import { depuis, formatTonnage } from '@/lib/utils'
 import { Carte, EtatVide, Progression, Squelette, Statistique } from '@/components/ui'
 import { CarteCamion } from '@/components/CarteCamion'
@@ -37,7 +37,7 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
   }
 
   const actifs = camions.filter((c) => c.statut !== 'ANNULE')
-  const enRetard = actifs.filter((c) => estEnRetard(c, referentiel))
+  const enRetard = actifs.filter((c) => portefeuille.camionEnRetard(c))
   const bloques = actifs.filter((c) => c.statut === 'BLOQUE')
   const livres = actifs.filter((c) => c.etape_courante > 6)
   const enTransit = actifs.filter((c) => c.etape_courante > 1 && c.etape_courante <= 6)
@@ -147,14 +147,17 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
             </span>
           </h2>
           <div className="grid gap-3 md:grid-cols-2">
-            {exceptions.map((camion) => (
-              <CarteCamion
-                key={camion.id}
-                camion={camion}
-                lot={lots.find((l) => l.id === camion.lot_id)}
-                referentiel={referentiel}
-              />
-            ))}
+            {exceptions.map((camion) => {
+              const lot = lots.find((l) => l.id === camion.lot_id)
+              return (
+                <CarteCamion
+                  key={camion.id}
+                  camion={camion}
+                  lot={lot}
+                  referentiel={portefeuille.etapesDuCamion(camion)}
+                />
+              )
+            })}
           </div>
         </section>
       )}
@@ -276,17 +279,10 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
         <EtatVide
           icone={<Truck className="size-10" />}
           titre="Aucun camion suivi"
-          description="Exécutez le script supabase/02_seed.sql pour charger le jeu de démonstration."
+          description="Créez une commande, un lot et ses dossiers camions depuis l’onglet Administration."
         />
       )}
     </div>
   )
-}
-
-/** Compte les camions nécessitant une attention (pastille de navigation). */
-export function nombreExceptions(portefeuille: PortefeuilleComplet): number {
-  return portefeuille.camions.filter(
-    (c) => c.statut === 'BLOQUE' || estEnRetard(c, portefeuille.referentiel),
-  ).length
 }
 

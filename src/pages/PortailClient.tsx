@@ -11,7 +11,7 @@
 import { Eye, Package, Truck } from 'lucide-react'
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
 import { useSession } from '@/session'
-import { estEnRetard, progressionLot, tonnage } from '@/lib/workflow'
+import { progressionLot, tonnage } from '@/lib/workflow'
 import { formatDateHeure, formatTonnage } from '@/lib/utils'
 import { Carte, Encart, EtatVide, Progression, Squelette, Statistique } from '@/components/ui'
 import { CarteCamion } from '@/components/CarteCamion'
@@ -48,7 +48,7 @@ export function PortailClient({ portefeuille }: { portefeuille: PortefeuilleComp
   const livres = actifs.filter((c) => c.etape_courante > 6)
   const enTransit = actifs.filter((c) => c.etape_courante > 1 && c.etape_courante <= 6)
   const aSurveiller = actifs.filter(
-    (c) => c.statut === 'BLOQUE' || estEnRetard(c, portefeuille.referentiel),
+    (c) => c.statut === 'BLOQUE' || portefeuille.camionEnRetard(c),
   )
 
   // Prochaine arrivée annoncée
@@ -138,7 +138,7 @@ export function PortailClient({ portefeuille }: { portefeuille: PortefeuilleComp
                   key={camion.id}
                   camion={camion}
                   lot={lot}
-                  referentiel={portefeuille.referentiel}
+                  referentiel={portefeuille.etapesDuLot(lot)}
                   vueClient
                 />
               ))}

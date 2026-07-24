@@ -61,6 +61,8 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
   const camion = portefeuille.camions.find((c) => c.id === id)
   const lot = portefeuille.lots.find((l) => l.id === camion?.lot_id)
   const commande = portefeuille.commandes.find((c) => c.id === lot?.commande_id)
+  // Le référentiel dépend du modèle d'étapes rattaché au lot
+  const referentiel = portefeuille.etapesDuLot(lot)
 
   if (portefeuille.chargement) {
     return (
@@ -90,7 +92,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
   }
 
   const progression = progressionCamion(camion)
-  const enRetard = estEnRetard(camion, portefeuille.referentiel)
+  const enRetard = estEnRetard(camion, referentiel)
   const incidentsOuverts = dossier.incidents.filter((i) => i.statut === 'OUVERT')
   const documentsVisibles = estClient
     ? dossier.documents.filter((d) => d.visible_client)
@@ -172,7 +174,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
               <BadgeCamion statut={camion.statut} />
               {enRetard && camion.statut !== 'BLOQUE' && (
                 <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-200">
-                  Retard {depassementSla(camion, portefeuille.referentiel)} h
+                  Retard {depassementSla(camion, referentiel)} h
                 </span>
               )}
             </div>
@@ -276,7 +278,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
         ) : (
           <Chronologie
             camion={camion}
-            referentiel={portefeuille.referentiel}
+            referentiel={referentiel}
             evenements={dossier.evenements}
             documents={documentsVisibles}
             vueClient={estClient}
@@ -309,7 +311,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
           ouverte
           onFermer={() => setEtapeEnEdition(null)}
           camion={camion}
-          lot={lot}
+          jalons={portefeuille.jalonsDuLot(lot)}
           etape={etapeEnEdition}
           documents={dossier.documents.filter(
             (d) => d.etape_numero === etapeEnEdition.numero,

@@ -11,45 +11,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { RoleUtilisateur } from './lib/types'
-
-export interface Profil {
-  id: string
-  nom: string
-  role: RoleUtilisateur
-  intitule: string
-  organisation_id: string
-  /** Renseigné pour un profil client : restreint la visibilité à ce client. */
-  client_id: string | null
-}
-
-const ORG = '11111111-1111-1111-1111-111111111111'
-
-export const PROFILS: Profil[] = [
-  {
-    id: '66666666-6666-6666-6666-666666666601',
-    nom: 'Joseph Kabeya',
-    role: 'OPS',
-    intitule: 'Responsable opérations',
-    organisation_id: ORG,
-    client_id: null,
-  },
-  {
-    id: '66666666-6666-6666-6666-666666666602',
-    nom: 'Alain Tshibangu',
-    role: 'TERRAIN',
-    intitule: 'Agent terrain / transitaire',
-    organisation_id: ORG,
-    client_id: null,
-  },
-  {
-    id: '66666666-6666-6666-6666-666666666603',
-    nom: 'Patrick Mwamba',
-    role: 'CLIENT',
-    intitule: 'Client — Kamoto Copper Company',
-    organisation_id: ORG,
-    client_id: '22222222-2222-2222-2222-222222222221',
-  },
-]
+import { PROFILS, type Profil } from './lib/profils'
 
 /* ------------------------------------------------------------------ */
 /* Matrice de droits (§7 du cahier des charges)                        */
@@ -63,6 +25,9 @@ export type Permission =
   | 'resoudre_incident'
   | 'voir_documents_sensibles' // avis bancaires, quittances, prix
   | 'voir_finance'
+  | 'administrer_referentiel' // clients, itinéraires, modèles d'étapes
+  | 'administrer_commercial' // commandes, lots, dossiers camions
+  | 'administrer_utilisateurs' // organisations, comptes et rôles
 
 const DROITS: Record<RoleUtilisateur, Permission[]> = {
   ADMIN: [
@@ -73,7 +38,12 @@ const DROITS: Record<RoleUtilisateur, Permission[]> = {
     'resoudre_incident',
     'voir_documents_sensibles',
     'voir_finance',
+    'administrer_referentiel',
+    'administrer_commercial',
+    'administrer_utilisateurs',
   ],
+  // Les opérations pilotent le commercial et le référentiel, mais ne
+  // gèrent pas les comptes utilisateurs (§7).
   OPS: [
     'voir_operations',
     'saisir_etape',
@@ -82,6 +52,8 @@ const DROITS: Record<RoleUtilisateur, Permission[]> = {
     'resoudre_incident',
     'voir_documents_sensibles',
     'voir_finance',
+    'administrer_referentiel',
+    'administrer_commercial',
   ],
   // L'agent terrain saisit mais ne valide pas son propre travail (§7)
   TERRAIN: ['voir_operations', 'saisir_etape', 'ouvrir_incident'],

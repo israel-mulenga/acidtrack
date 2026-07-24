@@ -231,29 +231,19 @@ export function champsManquants(
 /* Variantes par destination (§6.1 — critère AC-06)                    */
 /* ------------------------------------------------------------------ */
 
-const JALONS_PAR_DESTINATION: Record<string, string[]> = {
-  Lubumbashi: ['Kasumbalesa', 'Péage Lubumbashi'],
-  Likasi: ['Kasumbalesa', 'Péage Lubumbashi', 'Likasi'],
-  Kolwezi: ['Kasumbalesa', 'Péage Lubumbashi', 'Likasi', 'Fungurume', 'Péage Kolwezi'],
-}
-
-/**
- * Ne propose que les jalons réellement empruntés par l'itinéraire.
- * Exemple : sur une route Lubumbashi, le jalon Kolwezi est masqué (AC-06).
- */
-export function jalonsPourDestination(destination: string): string[] {
-  return JALONS_PAR_DESTINATION[destination] ?? JALONS_PAR_DESTINATION.Kolwezi
-}
-
 /**
  * Applique la variante d'itinéraire aux options d'un champ « point atteint ».
+ *
+ * Les jalons proviennent de l'itinéraire paramétré dans l'application : sur
+ * une route Lubumbashi, les jalons Kolwezi ne sont ni proposés ni requis
+ * (critère AC-06).
  */
 export function optionsChamp(
   cle: string,
   optionsParDefaut: string[] | undefined,
-  destination: string,
+  jalons: string[],
 ): string[] {
-  if (cle === 'point_atteint') return jalonsPourDestination(destination)
+  if (cle === 'point_atteint' && jalons.length > 0) return jalons
   return optionsParDefaut ?? []
 }
 

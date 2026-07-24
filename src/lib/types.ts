@@ -29,7 +29,13 @@ export interface ChampEtape {
   options?: string[]
 }
 
+/**
+ * Une macro-étape telle que définie dans un modèle. Le référentiel n'est
+ * plus figé : chaque itinéraire peut porter sa propre séquence.
+ */
 export interface EtapeReferentiel {
+  id: string
+  modele_id: string
   numero: number
   code: string
   libelle: string
@@ -38,6 +44,42 @@ export interface EtapeReferentiel {
   sla_heures: number
   documents_requis: string[]
   champs: ChampEtape[]
+}
+
+export interface ModeleEtapes {
+  id: string
+  organisation_id: string
+  nom: string
+  description: string | null
+  par_defaut: boolean
+  actif: boolean
+}
+
+export interface PointChargement {
+  id: string
+  organisation_id: string
+  nom: string
+  ville: string | null
+  pays: string
+  contact_nom: string | null
+  contact_tel: string | null
+  actif: boolean
+}
+
+export interface Itineraire {
+  id: string
+  organisation_id: string
+  nom: string
+  point_chargement_id: string | null
+  origine: string
+  destination: string
+  corridor: string
+  /** Points de contrôle réellement empruntés — pilote le masquage AC-06. */
+  jalons: string[]
+  distance_km: number | null
+  duree_estimee_h: number | null
+  modele_etapes_id: string | null
+  actif: boolean
 }
 
 export interface Organisation {
@@ -68,6 +110,7 @@ export interface Client {
   ville: string | null
   contact_nom: string | null
   contact_tel: string | null
+  actif: boolean
 }
 
 export interface Commande {
@@ -97,6 +140,8 @@ export interface Lot {
   periode_debut: string | null
   periode_fin: string | null
   statut: string
+  itineraire_id: string | null
+  modele_etapes_id: string | null
 }
 
 export interface Camion {

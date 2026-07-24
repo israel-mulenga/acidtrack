@@ -16,7 +16,8 @@ import {
   Radio,
   Truck,
 } from 'lucide-react'
-import { PROFILS, useSession, type Profil } from '@/session'
+import { useSession } from '@/session'
+import { PROFILS, type Profil } from '@/lib/profils'
 import { cn, initiales } from '@/lib/utils'
 
 const ICONE_ROLE: Record<string, ReactNode> = {
