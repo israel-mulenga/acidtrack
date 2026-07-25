@@ -272,7 +272,7 @@ language plpgsql
 as $$
 begin
   if new.gravite = 'CRITIQUE' and new.statut = 'OUVERT' then
-    update camions set statut = 'BLOQUE', derniere_maj_at = now() where id = new.camion_id;
+    update camions set statut = 'BLOQUE'::statut_camion, derniere_maj_at = now() where id = new.camion_id;
   elsif new.statut = 'RESOLU' then
     -- On ne débloque que s'il ne reste aucun autre incident critique ouvert
     if not exists (
@@ -283,7 +283,7 @@ begin
         and id <> new.id
     ) then
       update camions
-      set statut = case when etape_courante >= 8 then 'TERMINE' else 'EN_COURS' end,
+      set statut = case when etape_courante >= 8 then 'TERMINE'::statut_camion else 'EN_COURS'::statut_camion end,
           derniere_maj_at = now()
       where id = new.camion_id;
     end if;
