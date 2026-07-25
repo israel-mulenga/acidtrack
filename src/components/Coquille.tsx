@@ -19,6 +19,7 @@ import {
 import { useSession } from '@/session'
 import { PROFILS, type Profil } from '@/lib/profils'
 import { cn, initiales } from '@/lib/utils'
+import { IntegrationPWA } from './PWA'
 
 const ICONE_ROLE: Record<string, ReactNode> = {
   OPS: <LayoutDashboard className="size-4" />,
@@ -198,6 +199,9 @@ export function Coquille({
           </div>
         </nav>
       )}
+
+      {/* Installation, mise à jour et perte de réseau */}
+      <IntegrationPWA />
     </div>
   )
 }

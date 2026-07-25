@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="AcidTrack">
+  <!--
+    Icône d'application AcidTrack.
+    Fond plein pour l'usage « maskable » : le camion tient dans la zone
+    sûre (cercle central de 80 %), quel que soit le masque appliqué par
+    le système (rond sur Android, écusson sur iOS).
+  -->
+  <rect width="512" height="512" fill="#101828"/>
+
+  <!-- Châssis -->
+  <rect x="104" y="268" width="304" height="16" rx="8" fill="#4f5e7a"/>
+
+  <!-- Citerne -->
+  <rect x="104" y="166" width="238" height="102" rx="51" fill="#f59e0b"/>
+  <!-- Cerclages de la citerne -->
+  <rect x="178" y="168" width="7" height="98" rx="3.5" fill="#c38012"/>
+  <rect x="262" y="168" width="7" height="98" rx="3.5" fill="#c38012"/>
+
+  <!-- Goutte : le produit transporté -->
+  <path d="M223 188c14 16 22 26 22 35a22 22 0 0 1-44 0c0-9 8-19 22-35z" fill="#423621"/>
+
+  <!-- Cabine -->
+  <path d="M356 196h30a14 14 0 0 1 12 7l16 28a14 14 0 0 1 2 7v30h-60z" fill="#8494ae"/>
+  <path d="M362 204h22l16 28h-38z" fill="#445064"/>
+
+  <!-- Roues -->
+  <circle cx="168" cy="298" r="30" fill="#d5dae3"/>
+  <circle cx="168" cy="298" r="13" fill="#101828"/>
+  <circle cx="366" cy="298" r="30" fill="#d5dae3"/>
+  <circle cx="366" cy="298" r="13" fill="#101828"/>
+
+  <!-- Route : le suivi s'estompe, d'un bout à l'autre du corridor -->
+  <rect x="104" y="342" width="72" height="12" rx="6" fill="#f59e0b"/>
+  <rect x="200" y="342" width="48" height="12" rx="6" fill="#9e6b16"/>
+  <rect x="272" y="342" width="48" height="12" rx="6" fill="#674b1d"/>
+  <rect x="344" y="342" width="64" height="12" rx="6" fill="#3e3322"/>
+</svg>
