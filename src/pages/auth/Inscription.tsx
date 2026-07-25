@@ -9,12 +9,14 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Container, Loader2 } from 'lucide-react'
 import { inscrireOrganisation, rejoindreInvitation } from '@/lib/auth'
+import { useSession } from '@/session'
 import { Bouton, Carte, Champ, Encart, Etiquette } from '@/components/ui'
 import { cn } from '@/lib/utils'
 
 type Parcours = 'organisation' | 'invitation'
 
 export function Inscription() {
+  const { rafraichirProfil } = useSession()
   const [parcours, setParcours] = useState<Parcours>('organisation')
   const [nomOrganisation, setNomOrganisation] = useState('')
   const [nomUtilisateur, setNomUtilisateur] = useState('')
@@ -40,6 +42,10 @@ export function Inscription() {
         await rejoindreInvitation({ email: email.trim(), motDePasse })
       }
       setSucces(true)
+      // Le compte Auth existe déjà avant que la ligne `utilisateurs` ne soit
+      // créée par la fonction RPC : on force le rechargement du profil pour
+      // que l'application bascule immédiatement, sans rafraîchissement manuel.
+      await rafraichirProfil()
     } catch (err) {
       setErreur(err instanceof Error ? err.message : 'Inscription impossible.')
     } finally {
@@ -51,7 +57,8 @@ export function Inscription() {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-ardoise-50 px-4">
         <Carte className="w-full max-w-sm p-5 text-center">
-          <p className="text-base font-semibold text-ardoise-900">Bienvenue sur AcidTrack !</p>
+          <Loader2 className="mx-auto size-6 animate-spin text-ardoise-400" />
+          <p className="mt-3 text-base font-semibold text-ardoise-900">Bienvenue sur AcidTrack !</p>
           <p className="mt-2 text-sm text-ardoise-500">
             Votre compte est prêt. L’application se charge automatiquement.
           </p>
