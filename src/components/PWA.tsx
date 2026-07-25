@@ -91,7 +91,8 @@ function useEnLigne(): boolean {
 /* Invite d'installation                                               */
 /* ------------------------------------------------------------------ */
 
-function useInstallation() {
+// eslint-disable-next-line react-refresh/only-export-components
+export function useInstallation() {
   const [evenement, setEvenement] = useState<EvenementInstallation | null>(null)
   const [refusee, setRefusee] = useState(
     () => localStorage.getItem(CLE_INSTALL_REFUSEE) === '1',
@@ -125,7 +126,30 @@ function useInstallation() {
     setRefusee(true)
   }
 
-  return { disponible: !!evenement && !refusee, installer, refuser }
+  return {
+    // Pilote le bandeau automatique : masqué une fois refusé.
+    disponible: !!evenement && !refusee,
+    // Pilote une action déclenchée manuellement (menu compte) : reste
+    // possible même après un refus, tant que Chrome garde l'évènement.
+    peutDeclencher: !!evenement,
+    installer,
+    refuser,
+  }
+}
+
+/** Vrai si l'app tourne déjà en mode installé (standalone). */
+// eslint-disable-next-line react-refresh/only-export-components
+export function estDejaInstallee(): boolean {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    // Propriété non standard, propre à Safari iOS
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  )
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function estAppareilIOS(): boolean {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent)
 }
 
 /**
@@ -133,13 +157,28 @@ function useInstallation() {
  * Le diagnostic ne dépend que du navigateur, il est donc calculé une fois.
  */
 function iosSansInstallation(): boolean {
-  const estIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
-  const dejaInstallee =
-    window.matchMedia('(display-mode: standalone)').matches ||
-    // Propriété non standard, propre à Safari iOS
-    (navigator as Navigator & { standalone?: boolean }).standalone === true
   const refusee = localStorage.getItem(CLE_INSTALL_REFUSEE) === '1'
-  return estIOS && !dejaInstallee && !refusee
+  return estAppareilIOS() && !estDejaInstallee() && !refusee
+}
+
+/** Étapes d'ajout à l'écran d'accueil, réutilisées par le bandeau et le menu compte. */
+export function InstructionsInstallationIOS() {
+  return (
+    <ol className="space-y-2.5 text-sm text-ardoise-200">
+      <li className="flex items-center gap-2.5">
+        <Share className="size-5 shrink-0 text-ambre-400" />
+        <span>
+          Touchez <strong className="text-white">Partager</strong>, en bas de Safari.
+        </span>
+      </li>
+      <li className="flex items-center gap-2.5">
+        <SquarePlus className="size-5 shrink-0 text-ambre-400" />
+        <span>
+          Choisissez <strong className="text-white">Sur l’écran d’accueil</strong>.
+        </span>
+      </li>
+    </ol>
+  )
 }
 
 /* ------------------------------------------------------------------ */
@@ -273,20 +312,7 @@ export function IntegrationPWA() {
               <X className="size-4" />
             </button>
           </div>
-          <ol className="space-y-2.5 text-sm text-ardoise-200">
-            <li className="flex items-center gap-2.5">
-              <Share className="size-5 shrink-0 text-ambre-400" />
-              <span>
-                Touchez <strong className="text-white">Partager</strong>, en bas de Safari.
-              </span>
-            </li>
-            <li className="flex items-center gap-2.5">
-              <SquarePlus className="size-5 shrink-0 text-ambre-400" />
-              <span>
-                Choisissez <strong className="text-white">Sur l’écran d’accueil</strong>.
-              </span>
-            </li>
-          </ol>
+          <InstructionsInstallationIOS />
         </div>
       )}
     </div>

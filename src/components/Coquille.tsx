@@ -11,17 +11,26 @@ import {
   Check,
   ChevronDown,
   Container,
+  Download,
   Eye,
   LayoutDashboard,
   LogOut,
   Radio,
   Truck,
+  X,
 } from 'lucide-react'
 import { useSession } from '@/session'
 import { PROFILS, type CompteDemo } from '@/lib/profils'
 import { INTITULES_ROLE } from '@/lib/workflow'
 import { cn, initiales } from '@/lib/utils'
-import { IntegrationPWA } from './PWA'
+import { useToast } from './Toast'
+import {
+  estAppareilIOS,
+  estDejaInstallee,
+  IntegrationPWA,
+  InstructionsInstallationIOS,
+  useInstallation,
+} from './PWA'
 
 const ICONE_ROLE: Record<string, ReactNode> = {
   ADMIN: <Check className="size-4" />,
@@ -33,8 +42,11 @@ const ICONE_ROLE: Record<string, ReactNode> = {
 /** Menu du compte connecté : déconnexion, et bascule démo en développement. */
 function MenuCompte() {
   const { profil, deconnecter, basculeDemoActive, basculerProfilDemo } = useSession()
+  const installation = useInstallation()
+  const toast = useToast()
   const [ouvert, setOuvert] = useState(false)
   const [enCours, setEnCours] = useState(false)
+  const [instructionsIOS, setInstructionsIOS] = useState(false)
 
   if (!profil) return null
 
@@ -46,6 +58,22 @@ function MenuCompte() {
     } finally {
       setEnCours(false)
     }
+  }
+
+  // Toujours proposée, même après un refus du bandeau automatique : c'est
+  // la seule façon de rattraper une installation refusée par erreur.
+  const installerApplication = () => {
+    if (installation.peutDeclencher) {
+      void installation.installer()
+      return
+    }
+    if (estAppareilIOS()) {
+      setInstructionsIOS(true)
+      return
+    }
+    toast.succes(
+      'Ouvrez le menu de votre navigateur (⋮ ou icône de partage) puis choisissez « Installer l’application » ou « Ajouter à l’écran d’accueil ».',
+    )
   }
 
   return (
@@ -111,6 +139,32 @@ function MenuCompte() {
                   </button>
                 ))}
               </>
+            )}
+            {!estDejaInstallee() && !instructionsIOS && (
+              <button
+                onClick={installerApplication}
+                className="flex w-full items-center gap-3 border-t border-ardoise-100 px-3 py-2.5 text-left text-sm font-medium text-ardoise-700 transition-colors hover:bg-ardoise-50"
+              >
+                <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-ardoise-100 text-ardoise-600">
+                  <Download className="size-4" />
+                </span>
+                Installer l’application
+              </button>
+            )}
+            {instructionsIOS && (
+              <div className="border-t border-ardoise-100 bg-ardoise-900 p-3.5">
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <p className="text-sm font-semibold text-white">Ajouter à l’écran d’accueil</p>
+                  <button
+                    onClick={() => setInstructionsIOS(false)}
+                    aria-label="Fermer"
+                    className="rounded-lg p-1 text-ardoise-400 transition-colors hover:bg-ardoise-800 hover:text-white"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+                <InstructionsInstallationIOS />
+              </div>
             )}
             <button
               onClick={() => void deconnecter()}
