@@ -88,7 +88,9 @@ export interface Organisation {
   plan: string
   langue: string
   fuseau: string
-  statut: string
+  devise: string
+  logo_url: string | null
+  statut: 'ACTIF' | 'SUSPENDU'
 }
 
 export interface Utilisateur {
@@ -99,7 +101,9 @@ export interface Utilisateur {
   email: string | null
   telephone: string | null
   client_id: string | null
-  statut: string
+  /** Rattachement au compte Supabase Auth ; null tant que l'invitation n'est pas réclamée. */
+  auth_id: string | null
+  statut: 'INVITE' | 'ACTIF' | 'SUSPENDU'
 }
 
 export interface Client {

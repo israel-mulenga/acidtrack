@@ -10,7 +10,7 @@
 
 import { Eye, Package, Truck } from 'lucide-react'
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
-import { useSession } from '@/session'
+import { useUtilisateur } from '@/session'
 import { progressionLot, tonnage } from '@/lib/workflow'
 import { formatDateHeure, formatTonnage } from '@/lib/utils'
 import { Carte, Encart, EtatVide, Progression, Squelette, Statistique } from '@/components/ui'
@@ -18,7 +18,7 @@ import { CarteCamion } from '@/components/CarteCamion'
 import { IndicateurTempsReel } from '@/components/Coquille'
 
 export function PortailClient({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
-  const { profil } = useSession()
+  const profil = useUtilisateur()
 
   if (portefeuille.chargement) {
     return (

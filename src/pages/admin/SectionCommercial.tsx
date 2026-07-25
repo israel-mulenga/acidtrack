@@ -9,7 +9,7 @@
 import { Link } from 'react-router-dom'
 import { ExternalLink, Truck } from 'lucide-react'
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
-import { useSession } from '@/session'
+import { useUtilisateur } from '@/session'
 import {
   controleQuantiteLot,
   creer,
@@ -34,7 +34,7 @@ const nombreOuNull = (v: unknown) => (texte(v) === '' ? null : Number(v))
 /* ------------------------------------------------------------------ */
 
 export function SectionCommandes({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
-  const { profil } = useSession()
+  const profil = useUtilisateur()
   const toast = useToast()
 
   return (
@@ -185,7 +185,7 @@ export function SectionLots({
   portefeuille: PortefeuilleComplet
   onAjouterCamions: (lot: Lot) => void
 }) {
-  const { profil } = useSession()
+  const profil = useUtilisateur()
   const toast = useToast()
 
   return (

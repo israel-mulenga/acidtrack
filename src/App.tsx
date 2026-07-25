@@ -1,5 +1,13 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { AlertTriangle, Eye, LayoutDashboard, Package, Settings, Truck } from 'lucide-react'
+import {
+  AlertTriangle,
+  Eye,
+  LayoutDashboard,
+  Loader2,
+  Package,
+  Settings,
+  Truck,
+} from 'lucide-react'
 import { usePortefeuille } from '@/hooks/useDonnees'
 import { useSession } from '@/session'
 import { Coquille } from '@/components/Coquille'
@@ -10,10 +18,51 @@ import { FicheCamion } from '@/pages/FicheCamion'
 import { PortailClient } from '@/pages/PortailClient'
 import { MesTaches } from '@/pages/MesTaches'
 import { Administration } from '@/pages/Administration'
+import { Connexion } from '@/pages/auth/Connexion'
+import { Inscription } from '@/pages/auth/Inscription'
+import { MotDePasseOublie } from '@/pages/auth/MotDePasseOublie'
+import { ReinitialiserMotDePasse } from '@/pages/auth/ReinitialiserMotDePasse'
+import { NonRattache } from '@/pages/auth/NonRattache'
+
+/** Routes accessibles sans session active. */
+function RoutesPubliques() {
+  return (
+    <Routes>
+      <Route path="/inscription" element={<Inscription />} />
+      <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />
+      <Route path="/reinitialiser-mot-de-passe" element={<ReinitialiserMotDePasse />} />
+      <Route path="*" element={<Connexion />} />
+    </Routes>
+  )
+}
 
 export default function App() {
+  const { chargement, session, profil } = useSession()
+
+  if (chargement) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-ardoise-50">
+        <Loader2 className="size-6 animate-spin text-ardoise-400" />
+      </div>
+    )
+  }
+
+  // Le lien de réinitialisation ouvre une session « recovery » : cette
+  // route reste accessible même si un profil applicatif existe déjà.
+  if (window.location.pathname === '/reinitialiser-mot-de-passe') {
+    return <ReinitialiserMotDePasse />
+  }
+
+  if (!session) return <RoutesPubliques />
+  if (!profil) return <NonRattache />
+
+  return <Application />
+}
+
+function Application() {
   const portefeuille = usePortefeuille()
   const { estClient, profil, peut } = useSession()
+  if (!profil) return null
 
   const ongletAdmin = {
     vers: '/administration',

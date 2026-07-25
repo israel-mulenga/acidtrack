@@ -5,7 +5,7 @@
  */
 
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
-import { useSession } from '@/session'
+import { useSession, useUtilisateur } from '@/session'
 import { creer, modifier, supprimer } from '@/lib/crud'
 import type {
   Client,
@@ -14,6 +14,7 @@ import type {
   PointChargement,
   Utilisateur,
 } from '@/lib/types'
+import { inviterUtilisateur } from '@/lib/auth'
 import { CrudRessource } from '@/components/CrudRessource'
 import type { ValeursFormulaire } from '@/components/CrudRessource'
 import { useToast } from '@/components/Toast'
@@ -35,7 +36,7 @@ const nombreOuNull = (v: unknown) => (texte(v) === '' ? null : Number(v))
 /* ------------------------------------------------------------------ */
 
 export function SectionClients({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
-  const { profil } = useSession()
+  const profil = useUtilisateur()
   const toast = useToast()
 
   return (
@@ -118,7 +119,7 @@ export function SectionPointsChargement({
 }: {
   portefeuille: PortefeuilleComplet
 }) {
-  const { profil } = useSession()
+  const profil = useUtilisateur()
   const toast = useToast()
 
   return (
@@ -187,7 +188,7 @@ export function SectionPointsChargement({
 /* ------------------------------------------------------------------ */
 
 export function SectionItineraires({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
-  const { profil } = useSession()
+  const profil = useUtilisateur()
   const toast = useToast()
 
   return (
@@ -303,8 +304,18 @@ const ROLES = [
   { valeur: 'CLIENT', libelle: 'Client' },
 ]
 
+const STATUTS_COMPTE = [
+  { valeur: 'ACTIF', libelle: 'Actif' },
+  { valeur: 'SUSPENDU', libelle: 'Suspendu' },
+]
+
+const LIBELLE_STATUT_COMPTE: Record<string, string> = {
+  INVITE: 'Invitation en attente',
+  ACTIF: 'Actif',
+  SUSPENDU: 'Suspendu',
+}
+
 export function SectionUtilisateurs({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
-  const { profil } = useSession()
   const toast = useToast()
 
   return (
@@ -332,11 +343,36 @@ export function SectionUtilisateurs({ portefeuille }: { portefeuille: Portefeuil
             portefeuille.clients.find((c) => c.id === u.client_id)?.raison_sociale ?? '—',
           masquerMobile: true,
         },
+        {
+          cle: 'statut',
+          libelle: 'Statut',
+          rendu: (u) => (
+            <span
+              className={
+                u.statut === 'ACTIF'
+                  ? 'text-emerald-600'
+                  : u.statut === 'SUSPENDU'
+                    ? 'text-red-600'
+                    : 'text-ambre-600'
+              }
+            >
+              {LIBELLE_STATUT_COMPTE[u.statut] ?? u.statut}
+            </span>
+          ),
+          masquerMobile: true,
+        },
       ]}
-      champs={() => [
+      champs={(element) => [
         { cle: 'nom', libelle: 'Nom complet', type: 'texte', obligatoire: true },
         { cle: 'role', libelle: 'Rôle', type: 'liste', obligatoire: true, options: ROLES },
-        { cle: 'email', libelle: 'E-mail', type: 'texte' },
+        {
+          cle: 'email',
+          libelle: 'E-mail',
+          type: 'texte',
+          obligatoire: !element,
+          lectureSeule: !!element,
+          aide: !element ? 'Sert à identifier la personne lors de son inscription.' : undefined,
+        },
         { cle: 'telephone', libelle: 'Téléphone', type: 'tel' },
         {
           cle: 'client_id',
@@ -349,6 +385,17 @@ export function SectionUtilisateurs({ portefeuille }: { portefeuille: Portefeuil
           aide: 'À renseigner uniquement pour un compte de rôle Client.',
           pleineLargeur: true,
         },
+        ...(element && element.statut !== 'INVITE'
+          ? [
+              {
+                cle: 'statut',
+                libelle: 'Statut du compte',
+                type: 'liste' as const,
+                options: STATUTS_COMPTE,
+                aide: 'Suspendre coupe l’accès sans supprimer l’historique de saisie.',
+              },
+            ]
+          : []),
       ]}
       valeursInitiales={(u) => ({
         nom: u?.nom ?? '',
@@ -356,6 +403,7 @@ export function SectionUtilisateurs({ portefeuille }: { portefeuille: Portefeuil
         email: u?.email ?? '',
         telephone: u?.telephone ?? '',
         client_id: u?.client_id ?? '',
+        statut: u?.statut ?? 'ACTIF',
       })}
       valider={(v: ValeursFormulaire) => {
         const erreurs: string[] = []
@@ -368,17 +416,27 @@ export function SectionUtilisateurs({ portefeuille }: { portefeuille: Portefeuil
         return erreurs
       }}
       onEnregistrer={async (v, element) => {
-        const ligne = {
-          organisation_id: profil.organisation_id,
-          nom: texte(v.nom),
-          role: texte(v.role),
-          email: texteOuNull(v.email),
-          telephone: texteOuNull(v.telephone),
-          client_id: texteOuNull(v.client_id),
+        if (!element) {
+          await inviterUtilisateur({
+            email: texte(v.email),
+            nom: texte(v.nom),
+            role: texte(v.role) as Utilisateur['role'],
+            clientId: texteOuNull(v.client_id),
+          })
+          toast.succes(
+            'Invitation créée. Communiquez l’adresse e-mail à la personne concernée : ' +
+              'elle réclame son accès en s’inscrivant avec cette même adresse.',
+          )
+        } else {
+          await modifier('utilisateurs', element.id, {
+            nom: texte(v.nom),
+            role: texte(v.role),
+            telephone: texteOuNull(v.telephone),
+            client_id: texteOuNull(v.client_id),
+            ...(element.statut !== 'INVITE' ? { statut: texte(v.statut) } : {}),
+          })
+          toast.succes('Utilisateur mis à jour.')
         }
-        if (element) await modifier('utilisateurs', element.id, ligne)
-        else await creer('utilisateurs', ligne)
-        toast.succes(element ? 'Utilisateur mis à jour.' : 'Utilisateur créé.')
         await portefeuille.recharger()
       }}
       onSupprimer={async (u) => {
@@ -395,14 +453,20 @@ export function SectionUtilisateurs({ portefeuille }: { portefeuille: Portefeuil
 /* ------------------------------------------------------------------ */
 
 export function SectionOrganisations({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
+  const { profil } = useSession()
   const toast = useToast()
+
+  // Une organisation ne gère jamais que son propre profil : la création
+  // d'une nouvelle organisation se fait exclusivement via la page
+  // d'inscription (isolation des données, cf. supabase/04_auth_rls.sql).
+  const laMienne = portefeuille.organisations.filter((o) => o.id === profil?.organisation_id)
 
   return (
     <CrudRessource<Organisation>
-      titre="Organisations"
-      description="Chaque organisation est un espace cloisonné : ses données ne sont jamais visibles par une autre."
-      libelleCreation="Nouvelle organisation"
-      elements={portefeuille.organisations}
+      titre="Organisation"
+      description="Identité, langue, fuseau horaire et devise de votre organisation."
+      pasDeCreation
+      elements={laMienne}
       rechercheDans={(o) => o.nom}
       libelleElement={(o) => o.nom}
       colonnes={[
@@ -410,8 +474,17 @@ export function SectionOrganisations({ portefeuille }: { portefeuille: Portefeui
           <span className="font-medium text-ardoise-900">{o.nom}</span>
         ) },
         { cle: 'plan', libelle: 'Plan', rendu: (o) => o.plan },
+        { cle: 'devise', libelle: 'Devise', rendu: (o) => o.devise, masquerMobile: true },
         { cle: 'fuseau', libelle: 'Fuseau', rendu: (o) => o.fuseau, masquerMobile: true },
-        { cle: 'statut', libelle: 'Statut', rendu: (o) => o.statut, masquerMobile: true },
+        {
+          cle: 'statut',
+          libelle: 'Statut',
+          rendu: (o) => (
+            <span className={o.statut === 'ACTIF' ? 'text-emerald-600' : 'text-red-600'}>
+              {o.statut === 'ACTIF' ? 'Actif' : 'Suspendu'}
+            </span>
+          ),
+        },
       ]}
       champs={() => [
         { cle: 'nom', libelle: 'Nom', type: 'texte', obligatoire: true },
@@ -435,24 +508,51 @@ export function SectionOrganisations({ portefeuille }: { portefeuille: Portefeui
             { valeur: 'en', libelle: 'Anglais' },
           ],
         },
+        {
+          cle: 'devise',
+          libelle: 'Devise',
+          type: 'liste',
+          obligatoire: true,
+          options: [
+            { valeur: 'USD', libelle: 'Dollar (USD)' },
+            { valeur: 'ZMW', libelle: 'Kwacha (ZMW)' },
+            { valeur: 'CDF', libelle: 'Franc congolais (CDF)' },
+          ],
+        },
         { cle: 'fuseau', libelle: 'Fuseau horaire', type: 'texte', obligatoire: true },
+        { cle: 'logo_url', libelle: 'Logo (URL)', type: 'texte', pleineLargeur: true },
+        {
+          cle: 'statut',
+          libelle: 'Statut',
+          type: 'liste',
+          obligatoire: true,
+          options: [
+            { valeur: 'ACTIF', libelle: 'Actif' },
+            { valeur: 'SUSPENDU', libelle: 'Suspendu' },
+          ],
+        },
       ]}
       valeursInitiales={(o) => ({
         nom: o?.nom ?? '',
         plan: o?.plan ?? 'PILOTE',
         langue: o?.langue ?? 'fr',
+        devise: o?.devise ?? 'USD',
         fuseau: o?.fuseau ?? 'Africa/Lubumbashi',
+        logo_url: o?.logo_url ?? '',
+        statut: o?.statut ?? 'ACTIF',
       })}
       onEnregistrer={async (v, element) => {
-        const ligne = {
+        if (!element) return
+        await modifier('organisations', element.id, {
           nom: texte(v.nom),
           plan: texte(v.plan),
           langue: texte(v.langue),
+          devise: texte(v.devise),
           fuseau: texte(v.fuseau),
-        }
-        if (element) await modifier('organisations', element.id, ligne)
-        else await creer('organisations', ligne)
-        toast.succes(element ? 'Organisation mise à jour.' : 'Organisation créée.')
+          logo_url: texteOuNull(v.logo_url),
+          statut: texte(v.statut),
+        })
+        toast.succes('Organisation mise à jour.')
         await portefeuille.recharger()
       }}
     />

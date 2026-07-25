@@ -1,17 +1,24 @@
 /**
- * Session applicative — sélecteur de profil.
+ * Session applicative — authentification Supabase réelle.
  *
- * Choix MVP assumé : l'authentification réelle (Supabase Auth) est remplacée
- * par une bascule de profil. Le modèle de droits, lui, est bien réel : chaque
- * écran et chaque action interrogent `peut()` ci-dessous. Le branchement sur
- * Supabase Auth consistera à remplacer la source de `utilisateur` sans
- * toucher aux règles.
+ * `profil` est dérivé de la ligne `utilisateurs` rattachée au compte
+ * Supabase Auth connecté (via `auth_id`). Le modèle de droits ci-dessous
+ * est celui qui pilote l'affichage ; la RLS (supabase/04_auth_rls.sql)
+ * applique la même logique côté base, pour que l'isolation des données
+ * ne repose jamais uniquement sur le front.
+ *
+ * En développement, un sélecteur permet de se connecter directement avec
+ * l'un des comptes de démonstration (cf. lib/profils.ts) — il s'agit
+ * d'une vraie connexion Supabase Auth, pas d'une simulation.
  */
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { RoleUtilisateur } from './lib/types'
-import { PROFILS, type Profil } from './lib/profils'
+import type { Session } from '@supabase/supabase-js'
+import { supabase } from './lib/supabase'
+import type { RoleUtilisateur, Utilisateur } from './lib/types'
+import { MOT_DE_PASSE_DEMO } from './lib/profils'
+import { connecter, deconnecter } from './lib/auth'
 
 /* ------------------------------------------------------------------ */
 /* Matrice de droits (§7 du cahier des charges)                        */
@@ -62,35 +69,91 @@ const DROITS: Record<RoleUtilisateur, Permission[]> = {
   CLIENT: [],
 }
 
+/** Activable en développement pour afficher le sélecteur de compte démo. */
+const BASCULE_DEMO_ACTIVE =
+  import.meta.env.DEV && import.meta.env.VITE_DEV_PROFILE_SWITCH === 'true'
+
 interface SessionContexte {
-  profil: Profil
-  setProfil: (p: Profil) => void
+  chargement: boolean
+  session: Session | null
+  /** null tant que le compte connecté n'est pas rattaché à une organisation. */
+  profil: Utilisateur | null
   peut: (permission: Permission) => boolean
   estClient: boolean
+  deconnecter: () => Promise<void>
+  rafraichirProfil: () => Promise<void>
+  basculeDemoActive: boolean
+  basculerProfilDemo: (email: string) => Promise<void>
 }
 
 const Contexte = createContext<SessionContexte | null>(null)
 
-const CLE_STOCKAGE = 'acidtrack.profil'
+async function chargerProfil(authId: string): Promise<Utilisateur | null> {
+  const { data, error } = await supabase
+    .from('utilisateurs')
+    .select('*')
+    .eq('auth_id', authId)
+    .maybeSingle()
+  if (error) {
+    console.error('Chargement du profil impossible', error)
+    return null
+  }
+  return data as Utilisateur | null
+}
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const [profil, setProfilInterne] = useState<Profil>(() => {
-    const enregistre = localStorage.getItem(CLE_STOCKAGE)
-    return PROFILS.find((p) => p.id === enregistre) ?? PROFILS[0]
-  })
+  const [chargement, setChargement] = useState(true)
+  const [session, setSession] = useState<Session | null>(null)
+  const [profil, setProfil] = useState<Utilisateur | null>(null)
+
+  const rafraichirProfil = async () => {
+    const { data } = await supabase.auth.getSession()
+    if (data.session) setProfil(await chargerProfil(data.session.user.id))
+  }
 
   useEffect(() => {
-    localStorage.setItem(CLE_STOCKAGE, profil.id)
-  }, [profil])
+    let actif = true
+
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!actif) return
+      setSession(data.session)
+      if (data.session) setProfil(await chargerProfil(data.session.user.id))
+      setChargement(false)
+    })
+
+    const { data: abonnement } = supabase.auth.onAuthStateChange((_evenement, nouvelleSession) => {
+      setSession(nouvelleSession)
+      if (nouvelleSession) {
+        chargerProfil(nouvelleSession.user.id).then((p) => {
+          if (actif) setProfil(p)
+        })
+      } else {
+        setProfil(null)
+      }
+      setChargement(false)
+    })
+
+    return () => {
+      actif = false
+      abonnement.subscription.unsubscribe()
+    }
+  }, [])
 
   const valeur = useMemo<SessionContexte>(
     () => ({
+      chargement,
+      session,
       profil,
-      setProfil: setProfilInterne,
-      peut: (permission) => DROITS[profil.role].includes(permission),
-      estClient: profil.role === 'CLIENT',
+      peut: (permission) => (profil ? DROITS[profil.role].includes(permission) : false),
+      estClient: profil?.role === 'CLIENT',
+      deconnecter,
+      rafraichirProfil,
+      basculeDemoActive: BASCULE_DEMO_ACTIVE,
+      basculerProfilDemo: async (email: string) => {
+        await connecter(email, MOT_DE_PASSE_DEMO)
+      },
     }),
-    [profil],
+    [chargement, session, profil],
   )
 
   return <Contexte.Provider value={valeur}>{children}</Contexte.Provider>
@@ -101,4 +164,16 @@ export function useSession(): SessionContexte {
   const contexte = useContext(Contexte)
   if (!contexte) throw new Error('useSession doit être utilisé dans un SessionProvider')
   return contexte
+}
+
+/**
+ * Variante du profil garantie non nulle, pour les écrans qui ne sont
+ * jamais rendus avant qu'un utilisateur ne soit rattaché à une
+ * organisation (tout ce qui vit sous `<Application>`, cf. App.tsx).
+ */
+// eslint-disable-next-line react-refresh/only-export-components
+export function useUtilisateur(): Utilisateur {
+  const { profil } = useSession()
+  if (!profil) throw new Error('Aucun utilisateur rattaché à la session.')
+  return profil
 }

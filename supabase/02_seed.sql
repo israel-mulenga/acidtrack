@@ -118,7 +118,9 @@ insert into utilisateurs (id, organisation_id, nom, role, email, telephone, clie
  'Patrick Mwamba', 'CLIENT', 'patrick@kcc.cd', '+243 991 000 111',
  '22222222-2222-2222-2222-222222222221'),
 ('66666666-6666-6666-6666-666666666604', '11111111-1111-1111-1111-111111111111',
- 'Nadine Kalonji', 'FINANCE', 'finance@sulfachem.cd', '+243 970 111 004', null);
+ 'Nadine Kalonji', 'FINANCE', 'finance@sulfachem.cd', '+243 970 111 004', null),
+('66666666-6666-6666-6666-666666666605', '11111111-1111-1111-1111-111111111111',
+ 'Sarah Ilunga', 'ADMIN', 'admin@sulfachem.cd', '+243 970 111 005', null);
 
 -- ---------------------------------------------------------------------
 -- 3. Commande et lots

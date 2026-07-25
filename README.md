@@ -35,18 +35,40 @@ npm run dev
 ### Configuration Supabase
 
 1. Créer un projet sur [supabase.com](https://supabase.com) (plan gratuit).
-2. Dans **SQL Editor**, exécuter dans l'ordre :
-   - `supabase/01_schema.sql` — tables, types, RLS, trigger, bucket de stockage
+2. **Authentication → Providers → Email** : désactiver *Confirm email* (permet
+   à l'inscription de démo d'ouvrir une session immédiatement).
+3. Dans **SQL Editor**, exécuter dans l'ordre :
+   - `supabase/01_schema.sql` — tables, types, trigger, bucket de stockage
    - `supabase/02_seed.sql` — jeu de démonstration (1 commande, 2 lots, 5 camions)
    - `supabase/03_crud.sql` — référentiel paramétrable (points de chargement,
      itinéraires, modèles d'étapes) et rattachement des lots
+   - `supabase/04_auth_rls.sql` — authentification Supabase Auth, fonctions de
+     création / invitation d'organisation, RLS multi-tenant
+   - `supabase/05_seed_auth.sql` — comptes Auth des 5 profils de démonstration
+     (mot de passe unique : `AcidTrack2024!`)
 
-   > `03_crud.sql` remplace la table figée `etapes_referentiel` par des
-   > modèles d'étapes éditables depuis l'application. Une fois la migration
-   > passée, ne rejouez plus `02_seed.sql` : relancez `01`, `02` puis `03`
-   > dans l'ordre si vous repartez d'une base vierge.
-3. Dans **Project Settings → API**, copier `Project URL` et la clé `anon public`
+   > L'ordre est important : `04` ajoute la colonne `utilisateurs.auth_id`
+   > qu'utilise `05`. Si vous repartez d'une base vierge, rejouez les cinq
+   > scripts dans l'ordre `01` → `05`.
+4. Dans **Project Settings → API**, copier `Project URL` et la clé `anon public`
    dans `.env.local`.
+
+### Authentification
+
+L'authentification est réelle (Supabase Auth, e-mail/mot de passe) :
+
+- **Créer une organisation** (`/inscription`) : self-service, devient ADMIN.
+- **Rejoindre une organisation** : un ADMIN invite un e-mail depuis
+  Administration → Utilisateurs ; la personne s'inscrit ensuite avec cette
+  même adresse (onglet « J'ai été invité(e) » de `/inscription`).
+- **Isolation des données** : chaque table métier est filtrée par RLS sur
+  l'organisation du compte connecté ; un compte Client est en outre restreint
+  à ses propres commandes/lots/camions/documents visibles (§ `04_auth_rls.sql`).
+
+En développement, `VITE_DEV_PROFILE_SWITCH=true` (voir `.env.example`) affiche
+un sélecteur de compte démo dans l'en-tête : il se connecte réellement avec
+l'un des 5 comptes seedés par `05_seed_auth.sql` (mot de passe `AcidTrack2024!`),
+ce qui exerce la vraie RLS plutôt qu'une simulation.
 
 ---
 
@@ -54,7 +76,10 @@ npm run dev
 
 ### Couvert par le MVP
 
-- **Trois profils** : Opérations, Agent terrain, Client — bascule instantanée.
+- **Authentification réelle** (Supabase Auth) : création d'organisation,
+  invitation d'utilisateurs, réinitialisation de mot de passe, isolation
+  stricte des données par organisation et par client via RLS (AC-09).
+- **Cinq rôles** : Administrateur, Opérations, Agent terrain, Finance, Client.
 - **Hiérarchie métier** : commande → lot → dossier camion → événements.
 - **Workflow 7 macro-étapes** avec chronologie verticale par camion.
 - **Mise à jour d'étape** : champs dynamiques, capture GPS, photo/document réels
@@ -69,11 +94,11 @@ npm run dev
 
 ### Hors MVP — phase 2
 
-Notifications push/e-mail/WhatsApp, saisie hors-ligne avec file de
-synchronisation, export PDF signé, interface bilingue FR/EN, module Finance
-complet, MFA, administration SaaS, import Excel, carte GPS temps réel,
-durcissement RLS multi-tenant (la colonne `organisation_id` est déjà présente
-sur toutes les tables : l'activation relève du paramétrage).
+Notifications push/e-mail/WhatsApp (les invitations se transmettent
+manuellement pour le MVP, sans envoi d'e-mail automatisé), saisie hors-ligne
+avec file de synchronisation, export PDF signé, interface bilingue FR/EN,
+module Finance complet, authentification multifacteur, import Excel, carte
+GPS temps réel.
 
 ---
 
@@ -87,9 +112,11 @@ src/
   pages/          Écrans par profil
   pages/admin/    Écrans de création et d'édition du référentiel
 supabase/
-  01_schema.sql   Schéma, RLS, trigger, bucket
-  02_seed.sql     Données de démonstration
-  03_crud.sql     Référentiel paramétrable et index
+  01_schema.sql     Schéma, trigger, bucket
+  02_seed.sql       Données de démonstration
+  03_crud.sql       Référentiel paramétrable et index
+  04_auth_rls.sql   Auth Supabase, RPC organisation/invitation, RLS multi-tenant
+  05_seed_auth.sql  Comptes Auth des profils de démonstration
 ```
 
 Toute la logique dérivée (progression, SLA, statut d'étape, complétude

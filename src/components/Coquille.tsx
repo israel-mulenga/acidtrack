@@ -13,27 +13,39 @@ import {
   Container,
   Eye,
   LayoutDashboard,
+  LogOut,
   Radio,
   Truck,
 } from 'lucide-react'
 import { useSession } from '@/session'
-import { PROFILS, type Profil } from '@/lib/profils'
+import { PROFILS, type CompteDemo } from '@/lib/profils'
+import { INTITULES_ROLE } from '@/lib/workflow'
 import { cn, initiales } from '@/lib/utils'
 import { IntegrationPWA } from './PWA'
 
 const ICONE_ROLE: Record<string, ReactNode> = {
+  ADMIN: <Check className="size-4" />,
   OPS: <LayoutDashboard className="size-4" />,
   TERRAIN: <Truck className="size-4" />,
   CLIENT: <Eye className="size-4" />,
 }
 
-function SelecteurProfil() {
-  const { profil, setProfil } = useSession()
+/** Menu du compte connecté : déconnexion, et bascule démo en développement. */
+function MenuCompte() {
+  const { profil, deconnecter, basculeDemoActive, basculerProfilDemo } = useSession()
   const [ouvert, setOuvert] = useState(false)
+  const [enCours, setEnCours] = useState(false)
 
-  const choisir = (p: Profil) => {
-    setProfil(p)
-    setOuvert(false)
+  if (!profil) return null
+
+  const basculer = async (compte: CompteDemo) => {
+    setEnCours(true)
+    try {
+      await basculerProfilDemo(compte.email)
+      setOuvert(false)
+    } finally {
+      setEnCours(false)
+    }
   }
 
   return (
@@ -52,7 +64,7 @@ function SelecteurProfil() {
             {profil.nom}
           </span>
           <span className="block truncate text-[11px] leading-tight text-ardoise-300">
-            {profil.intitule}
+            {INTITULES_ROLE[profil.role]}
           </span>
         </span>
         <ChevronDown
@@ -67,30 +79,46 @@ function SelecteurProfil() {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOuvert(false)} aria-hidden />
           <div className="animate-fade-in absolute right-0 z-50 mt-2 w-72 overflow-hidden rounded-xl border border-ardoise-200 bg-white shadow-xl">
-            <p className="border-b border-ardoise-100 bg-ardoise-50 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-ardoise-500">
-              Changer de profil
-            </p>
-            {PROFILS.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => choisir(p)}
-                className={cn(
-                  'flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-ardoise-50',
-                  p.id === profil.id && 'bg-ambre-50/60',
-                )}
-              >
-                <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-ardoise-100 text-ardoise-600">
-                  {ICONE_ROLE[p.role]}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-ardoise-900">
-                    {p.nom}
-                  </span>
-                  <span className="block truncate text-xs text-ardoise-500">{p.intitule}</span>
-                </span>
-                {p.id === profil.id && <Check className="size-4 shrink-0 text-ambre-600" />}
-              </button>
-            ))}
+            {basculeDemoActive && (
+              <>
+                <p className="border-b border-ardoise-100 bg-ardoise-50 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-ardoise-500">
+                  Bascule démo (développement)
+                </p>
+                {PROFILS.map((p) => (
+                  <button
+                    key={p.email}
+                    disabled={enCours}
+                    onClick={() => void basculer(p)}
+                    className={cn(
+                      'flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-ardoise-50 disabled:opacity-50',
+                      p.email === profil.email && 'bg-ambre-50/60',
+                    )}
+                  >
+                    <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-ardoise-100 text-ardoise-600">
+                      {ICONE_ROLE[p.role]}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium text-ardoise-900">
+                        {p.nom}
+                      </span>
+                      <span className="block truncate text-xs text-ardoise-500">
+                        {p.intitule}
+                      </span>
+                    </span>
+                    {p.email === profil.email && (
+                      <Check className="size-4 shrink-0 text-ambre-600" />
+                    )}
+                  </button>
+                ))}
+              </>
+            )}
+            <button
+              onClick={() => void deconnecter()}
+              className="flex w-full items-center gap-3 border-t border-ardoise-100 px-3 py-2.5 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+            >
+              <LogOut className="size-4" />
+              Se déconnecter
+            </button>
           </div>
         </>
       )}
@@ -133,7 +161,7 @@ export function Coquille({
               </p>
             </div>
           </div>
-          <SelecteurProfil />
+          <MenuCompte />
         </div>
 
         {/* Navigation desktop */}

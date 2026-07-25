@@ -9,7 +9,7 @@
 import { useState } from 'react'
 import { Copy, Star, Workflow } from 'lucide-react'
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
-import { useSession } from '@/session'
+import { useUtilisateur } from '@/session'
 import {
   creer,
   definirModeleParDefaut,
@@ -58,7 +58,7 @@ function analyserChamps(valeur: unknown): { champs: ChampEtape[] } | { erreur: s
 }
 
 export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
-  const { profil } = useSession()
+  const profil = useUtilisateur()
   const toast = useToast()
   const [choix, setChoix] = useState<string | null>(null)
 

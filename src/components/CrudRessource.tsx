@@ -74,6 +74,7 @@ export function CrudRessource<T extends { id: string }>({
   valider,
   actionsSupplementaires,
   libelleCreation = 'Nouveau',
+  pasDeCreation = false,
 }: {
   titre: string
   description?: string
@@ -90,6 +91,8 @@ export function CrudRessource<T extends { id: string }>({
   valider?: (valeurs: ValeursFormulaire, element: T | null) => string[]
   actionsSupplementaires?: (element: T) => ReactNode
   libelleCreation?: string
+  /** Masque la création : ressource gérée uniquement en modification. */
+  pasDeCreation?: boolean
 }) {
   const [recherche, setRecherche] = useState('')
   const [edition, setEdition] = useState<{ ouvert: boolean; element: T | null }>({
@@ -169,10 +172,12 @@ export function CrudRessource<T extends { id: string }>({
           </h2>
           {description && <p className="mt-0.5 text-sm text-ardoise-500">{description}</p>}
         </div>
-        <Bouton onClick={() => ouvrir(null)}>
-          <Plus className="size-4" />
-          {libelleCreation}
-        </Bouton>
+        {!pasDeCreation && (
+          <Bouton onClick={() => ouvrir(null)}>
+            <Plus className="size-4" />
+            {libelleCreation}
+          </Bouton>
+        )}
       </div>
 
       {/* Recherche */}
@@ -198,7 +203,7 @@ export function CrudRessource<T extends { id: string }>({
               : 'Créez le premier enregistrement pour commencer.'
           }
           action={
-            !recherche ? (
+            !recherche && !pasDeCreation ? (
               <Bouton onClick={() => ouvrir(null)}>
                 <Plus className="size-4" />
                 {libelleCreation}

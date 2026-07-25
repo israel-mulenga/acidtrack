@@ -11,6 +11,7 @@ import type {
   Camion,
   Document,
   EtapeEvenement,
+  RoleUtilisateur,
   EtapeReferentiel,
   StatutCamion,
   StatutEtape,
@@ -54,6 +55,15 @@ export const LIBELLE_STATUT_CAMION: Record<StatutCamion, string> = {
   TERMINE: 'Terminé',
   BLOQUE: 'Bloqué',
   ANNULE: 'Annulé',
+}
+
+/** Intitulé affiché pour chaque rôle (en-tête, sélecteur de compte). */
+export const INTITULES_ROLE: Record<RoleUtilisateur, string> = {
+  ADMIN: 'Administrateur',
+  OPS: 'Responsable opérations',
+  TERRAIN: 'Agent terrain',
+  FINANCE: 'Finance',
+  CLIENT: 'Client',
 }
 
 export const LIBELLE_DOCUMENT: Record<string, string> = {

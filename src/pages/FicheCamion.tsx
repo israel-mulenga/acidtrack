@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import type { EtapeEvenement, EtapeReferentiel, Incident } from '@/lib/types'
 import { useDossierCamion, type PortefeuilleComplet } from '@/hooks/useDonnees'
-import { useSession } from '@/session'
+import { useSession, useUtilisateur } from '@/session'
 import {
   ErreurMetier,
   rejeterEvenement,
@@ -48,7 +48,8 @@ import { useToast } from '@/components/Toast'
 
 export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
   const { id } = useParams<{ id: string }>()
-  const { profil, peut, estClient } = useSession()
+  const { peut, estClient } = useSession()
+  const profil = useUtilisateur()
   const toast = useToast()
 
   const dossier = useDossierCamion(id)
