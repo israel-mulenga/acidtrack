@@ -186,6 +186,18 @@ alter database postgres
   set app.settings.service_role_key = '<SERVICE_ROLE_KEY>';
 ```
 
+> **L'en-tête `Authorization` est obligatoire.** Par défaut, les Edge Functions
+> Supabase vérifient le JWT (`verify_jwt = true`). Le trigger envoie donc
+> `Authorization: Bearer <service_role_key>` — **c'est pourquoi le second
+> `alter database` ci-dessus est indispensable.** Sans lui, l'appel renvoie
+> **401**, aucun push n'est envoyé, et la notification n'apparaît que dans
+> l'application (toast) — jamais dans la barre système. Ne retirez pas cet
+> en-tête du trigger.
+>
+> _Alternative_ : déployer la fonction sans vérification JWT
+> (`supabase functions deploy envoyer-push --no-verify-jwt`) ; l'appel
+> fonctionne alors même sans en-tête, au prix d'un endpoint public.
+
 > Si l'extension `pg_net` n'est pas disponible sur votre projet, supprimez le
 > trigger `trg_declencher_push` et configurez plutôt un **Database Webhook**
 > (Dashboard → Database → Webhooks) sur `INSERT` de `notifications`, pointant
@@ -200,3 +212,36 @@ navigateur demande la permission puis enregistre l'abonnement dans
 > **HTTPS requis** (satisfait par le déploiement Vercel). Sur **iOS 16.4+**, la
 > réception de notifications push exige que la PWA soit **installée** sur
 > l'écran d'accueil.
+
+### Dépannage : « la notification n'apparaît que dans l'application »
+
+Symptôme : le toast in-app s'affiche (Realtime) mais **aucune bannière système**
+n'apparaît, y compris application fermée. Cela signifie que l'Edge Function
+n'est jamais exécutée. Vérifier dans l'ordre :
+
+1. **En-tête d'autorisation du trigger** (cause la plus fréquente) : tester
+   l'appel de la fonction à la main. Sans en-tête → `401` ; avec le
+   `service_role` → `{"envoyes":N}` :
+
+   ```bash
+   # Sans en-tête : doit renvoyer 401
+   curl -i -X POST 'https://<PROJECT_REF>.supabase.co/functions/v1/envoyer-push' \
+     -H 'Content-Type: application/json' -d '{"notification_id":"<UUID>"}'
+
+   # Avec le service_role : doit renvoyer {"envoyes":N}
+   curl -i -X POST 'https://<PROJECT_REF>.supabase.co/functions/v1/envoyer-push' \
+     -H 'Content-Type: application/json' \
+     -H 'Authorization: Bearer <SERVICE_ROLE_KEY>' \
+     -d '{"notification_id":"<UUID>"}'
+   ```
+
+   Si le premier renvoie 401 et le second réussit, (re)configurez
+   `app.settings.service_role_key` (étape 4) et **conservez l'en-tête
+   `Authorization` dans `fn_declencher_push`**.
+2. **Secrets VAPID** : `VAPID_PUBLIC_KEY` de la fonction doit correspondre à
+   `VITE_VAPID_PUBLIC_KEY` du front (même paire de clés), sinon les services
+   push rejettent l'envoi.
+3. **Permission navigateur** : la permission de notification doit être accordée
+   et l'abonnement présent dans `push_subscriptions`.
+4. **Système d'exploitation** : sur iOS, PWA **installée** requise ; sur macOS,
+   autoriser les notifications de Chrome/Safari dans Réglages Système.

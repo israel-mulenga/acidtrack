@@ -247,7 +247,17 @@ declare
 begin
   -- Sans URL configurée, on ne fait rien (le journal reste néanmoins écrit).
   if v_url is null or v_url = '' then
+    raise log 'fn_declencher_push : app.settings.edge_function_url non configuré, push ignoré';
     return new;
+  end if;
+
+  -- L'en-tête Authorization est OBLIGATOIRE : par défaut, les Edge Functions
+  -- Supabase vérifient le JWT (verify_jwt = true). Sans un Bearer valide,
+  -- l'appel renvoie 401 et AUCUN push n'est envoyé — la notification
+  -- n'apparaît alors que dans l'application (toast temps réel), jamais dans
+  -- la barre de notification du système.
+  if v_key is null or v_key = '' then
+    raise log 'fn_declencher_push : app.settings.service_role_key non configuré, l''appel renverra 401';
   end if;
 
   perform net.http_post(
