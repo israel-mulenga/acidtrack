@@ -14,6 +14,13 @@ export default defineConfig({
       // formulaire au poste frontière ne doit jamais voir sa page se
       // recharger sous ses doigts. La mise à jour est proposée, pas subie.
       registerType: 'prompt',
+      // Service worker personnalisé (src/sw.ts) : il conserve le
+      // préchargement Workbox et le runtime caching ci-dessous, et ajoute
+      // la réception des notifications Web Push (handlers 'push' /
+      // 'notificationclick').
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'AcidTrack — suivi du corridor',
@@ -40,38 +47,12 @@ export default defineConfig({
           { name: 'Tour de contrôle', short_name: 'Contrôle', url: '/controle' },
         ],
       },
-      workbox: {
+      injectManifest: {
         // Coquille applicative préchargée : l'application s'ouvre même
         // sans réseau, ce qui arrive sur la route entre Ndola et Kolwezi.
+        // Le runtime caching (Supabase, Storage) est désormais implémenté
+        // dans src/sw.ts.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        navigateFallback: '/index.html',
-        cleanupOutdatedCaches: true,
-        runtimeCaching: [
-          {
-            // Lectures Supabase : le réseau d'abord, le cache en secours.
-            // Les données affichées hors ligne sont donc les dernières
-            // connues — l'interface le signale explicitement.
-            urlPattern: ({ url, request }) =>
-              request.method === 'GET' && url.pathname.startsWith('/rest/v1/'),
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'donnees-supabase',
-              networkTimeoutSeconds: 5,
-              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 },
-              cacheableResponse: { statuses: [200] },
-            },
-          },
-          {
-            // Pièces jointes déjà consultées : inutile de les retélécharger.
-            urlPattern: ({ url }) => url.pathname.includes('/storage/v1/object/'),
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'documents',
-              expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 7 },
-              cacheableResponse: { statuses: [200] },
-            },
-          },
-        ],
       },
       devOptions: {
         // Permet de tester l'installation sans passer par un build

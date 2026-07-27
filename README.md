@@ -46,10 +46,13 @@ npm run dev
      création / invitation d'organisation, RLS multi-tenant
    - `supabase/05_seed_auth.sql` — comptes Auth des 5 profils de démonstration
      (mot de passe unique : `AcidTrack2024!`)
+   - `supabase/06_notifications.sql` — notifications push : tables
+     `push_subscriptions` / `notifications`, RLS, trigger CRUD générique et
+     déclenchement de l'Edge Function (voir « Notifications push » ci-dessous)
 
    > L'ordre est important : `04` ajoute la colonne `utilisateurs.auth_id`
-   > qu'utilise `05`. Si vous repartez d'une base vierge, rejouez les cinq
-   > scripts dans l'ordre `01` → `05`.
+   > qu'utilise `05`. Si vous repartez d'une base vierge, rejouez les six
+   > scripts dans l'ordre `01` → `06`.
 4. Dans **Project Settings → API**, copier `Project URL` et la clé `anon public`
    dans `.env.local`.
 
@@ -94,11 +97,14 @@ ce qui exerce la vraie RLS plutôt qu'une simulation.
 
 ### Hors MVP — phase 2
 
-Notifications push/e-mail/WhatsApp (les invitations se transmettent
+Notifications e-mail/WhatsApp (les invitations se transmettent
 manuellement pour le MVP, sans envoi d'e-mail automatisé), saisie hors-ligne
 avec file de synchronisation, export PDF signé, interface bilingue FR/EN,
 module Finance complet, authentification multifacteur, import Excel, carte
 GPS temps réel.
+
+> Les **notifications push** (Web Push) sont désormais implémentées — voir la
+> section « Notifications push » ci-dessous.
 
 ---
 
@@ -117,7 +123,80 @@ supabase/
   03_crud.sql       Référentiel paramétrable et index
   04_auth_rls.sql   Auth Supabase, RPC organisation/invitation, RLS multi-tenant
   05_seed_auth.sql  Comptes Auth des profils de démonstration
+  06_notifications.sql  Tables push, trigger CRUD, déclenchement Edge Function
+  functions/
+    envoyer-push/   Edge Function Deno d'envoi des Web Push
 ```
 
 Toute la logique dérivée (progression, SLA, statut d'étape, complétude
 documentaire) est centralisée dans `src/lib/workflow.ts`.
+
+---
+
+## Notifications push
+
+Chaque opération CRUD sur une table métier (`clients`, `commandes`, `lots`,
+`camions`, `etape_evenements`, `documents`, `incidents`, `paiements`,
+`utilisateurs`) écrit une ligne dans `notifications` via un trigger générique,
+puis l'Edge Function `envoyer-push` envoie une notification Web Push à tous les
+appareils abonnés de l'organisation — **y compris application fermée** (PWA
+installée). Un service worker personnalisé (`src/sw.ts`) reçoit le push et
+affiche la notification.
+
+### 1. Générer les clés VAPID
+
+```bash
+npx web-push generate-vapid-keys
+```
+
+Reporter la clé **publique** dans `.env.local` (elle est exposée au navigateur) :
+
+```
+VITE_VAPID_PUBLIC_KEY=<clé_publique>
+```
+
+### 2. Configurer les secrets de l'Edge Function
+
+```bash
+supabase secrets set \
+  VAPID_PUBLIC_KEY=<clé_publique> \
+  VAPID_PRIVATE_KEY=<clé_privée> \
+  VAPID_SUBJECT="mailto:admin@acidtrack.app"
+```
+
+`SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` sont fournis automatiquement à la
+fonction par la plateforme.
+
+### 3. Déployer la fonction
+
+```bash
+supabase functions deploy envoyer-push
+```
+
+### 4. Déclencher la fonction à chaque notification
+
+`06_notifications.sql` installe un trigger `AFTER INSERT ON notifications` qui
+appelle la fonction via **pg_net**. Configurer une fois, dans l'éditeur SQL :
+
+```sql
+alter database postgres
+  set app.settings.edge_function_url =
+  'https://<PROJECT_REF>.supabase.co/functions/v1/envoyer-push';
+alter database postgres
+  set app.settings.service_role_key = '<SERVICE_ROLE_KEY>';
+```
+
+> Si l'extension `pg_net` n'est pas disponible sur votre projet, supprimez le
+> trigger `trg_declencher_push` et configurez plutôt un **Database Webhook**
+> (Dashboard → Database → Webhooks) sur `INSERT` de `notifications`, pointant
+> vers l'URL de la fonction `envoyer-push`.
+
+### 5. Activer côté utilisateur
+
+Dans l'application, le menu compte propose « Activer les notifications » : le
+navigateur demande la permission puis enregistre l'abonnement dans
+`push_subscriptions`.
+
+> **HTTPS requis** (satisfait par le déploiement Vercel). Sur **iOS 16.4+**, la
+> réception de notifications push exige que la PWA soit **installée** sur
+> l'écran d'accueil.
