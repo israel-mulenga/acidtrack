@@ -18,6 +18,7 @@ import { FicheCamion } from '@/pages/FicheCamion'
 import { PortailClient } from '@/pages/PortailClient'
 import { MesTaches } from '@/pages/MesTaches'
 import { Administration } from '@/pages/Administration'
+import { PanneauAdmin } from '@/pages/PanneauAdmin'
 import { Connexion } from '@/pages/auth/Connexion'
 import { Inscription } from '@/pages/auth/Inscription'
 import { MotDePasseOublie } from '@/pages/auth/MotDePasseOublie'
@@ -37,7 +38,7 @@ function RoutesPubliques() {
 }
 
 export default function App() {
-  const { chargement, session, profil } = useSession()
+  const { chargement, session, profil, estSuperAdmin } = useSession()
 
   if (chargement) {
     return (
@@ -54,6 +55,9 @@ export default function App() {
   }
 
   if (!session) return <RoutesPubliques />
+  // Le superviseur plateforme n'appartient à aucune organisation : il ne voit
+  // que le panneau de supervision.
+  if (estSuperAdmin) return <PanneauAdmin />
   if (!profil) return <NonRattache />
 
   return <Application />

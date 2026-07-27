@@ -78,6 +78,8 @@ interface SessionContexte {
   session: Session | null
   /** null tant que le compte connecté n'est pas rattaché à une organisation. */
   profil: Utilisateur | null
+  /** true lorsque le compte est un superviseur plateforme (aucune organisation). */
+  estSuperAdmin: boolean
   peut: (permission: Permission) => boolean
   estClient: boolean
   deconnecter: () => Promise<void>
@@ -101,10 +103,20 @@ async function chargerProfil(authId: string): Promise<Utilisateur | null> {
   return data as Utilisateur | null
 }
 
+async function chargerSuperAdmin(): Promise<boolean> {
+  const { data, error } = await supabase.rpc('est_super_admin')
+  if (error) {
+    console.error('Vérification super-admin impossible', error)
+    return false
+  }
+  return data === true
+}
+
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [chargement, setChargement] = useState(true)
   const [session, setSession] = useState<Session | null>(null)
   const [profil, setProfil] = useState<Utilisateur | null>(null)
+  const [estSuperAdmin, setEstSuperAdmin] = useState(false)
 
   const rafraichirProfil = async () => {
     const { data } = await supabase.auth.getSession()
@@ -117,18 +129,34 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(async ({ data }) => {
       if (!actif) return
       setSession(data.session)
-      if (data.session) setProfil(await chargerProfil(data.session.user.id))
+      if (data.session) {
+        const [p, sa] = await Promise.all([
+          chargerProfil(data.session.user.id),
+          chargerSuperAdmin(),
+        ])
+        if (actif) {
+          setProfil(p)
+          setEstSuperAdmin(sa)
+        }
+      }
       setChargement(false)
     })
 
     const { data: abonnement } = supabase.auth.onAuthStateChange((_evenement, nouvelleSession) => {
       setSession(nouvelleSession)
       if (nouvelleSession) {
-        chargerProfil(nouvelleSession.user.id).then((p) => {
-          if (actif) setProfil(p)
+        Promise.all([
+          chargerProfil(nouvelleSession.user.id),
+          chargerSuperAdmin(),
+        ]).then(([p, sa]) => {
+          if (actif) {
+            setProfil(p)
+            setEstSuperAdmin(sa)
+          }
         })
       } else {
         setProfil(null)
+        setEstSuperAdmin(false)
       }
       setChargement(false)
     })
@@ -144,6 +172,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       chargement,
       session,
       profil,
+      estSuperAdmin,
       peut: (permission) => (profil ? DROITS[profil.role].includes(permission) : false),
       estClient: profil?.role === 'CLIENT',
       deconnecter,
@@ -153,7 +182,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         await connecter(email, MOT_DE_PASSE_DEMO)
       },
     }),
-    [chargement, session, profil],
+    [chargement, session, profil, estSuperAdmin],
   )
 
   return <Contexte.Provider value={valeur}>{children}</Contexte.Provider>
