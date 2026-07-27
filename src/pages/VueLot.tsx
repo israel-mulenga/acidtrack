@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ChevronLeft, Filter, Package } from 'lucide-react'
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
-import { progressionLot, tonnage } from '@/lib/workflow'
+import { progressionLot, tonnage, tonnageLivre } from '@/lib/workflow'
 import { cn, formatDate, formatTonnage } from '@/lib/utils'
 import { Carte, EtatVide, Progression, Squelette } from '@/components/ui'
 import { CarteCamion } from '@/components/CarteCamion'
@@ -41,6 +41,9 @@ export function VueLot({ portefeuille }: { portefeuille: PortefeuilleComplet }) 
   const client = portefeuille.clients.find((c) => c.id === commande?.client_id)
   const camions = portefeuille.camions.filter((c) => c.lot_id === lot.id)
   const progression = progressionLot(camions)
+  const livre = tonnageLivre(camions)
+  const planifie = Number(lot.quantite_planifiee_t)
+  const partLivree = planifie > 0 ? Math.min(Math.round((livre / planifie) * 100), 100) : 0
 
   const referentiel = portefeuille.etapesDuLot(lot)
 
@@ -96,6 +99,19 @@ export function VueLot({ portefeuille }: { portefeuille: PortefeuilleComplet }) 
         <p className="mt-1.5 text-xs italic text-ardoise-400">
           Progression pondérée par le tonnage net de chaque camion
         </p>
+
+        {/* Tonnage livré (§10) */}
+        <div className="mt-4 rounded-xl bg-ardoise-50 px-4 py-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-[11px] font-medium uppercase tracking-wide text-ardoise-500">
+              Livré
+            </span>
+            <span className="text-sm font-semibold tabular-nums text-ardoise-900">
+              {formatTonnage(livre)} / {formatTonnage(planifie)} livré
+            </span>
+          </div>
+          <Progression valeur={partLivree} className="mt-2 h-2" couleur="bg-emerald-500" />
+        </div>
 
         <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-ardoise-100 pt-4 sm:grid-cols-4">
           <Resume libelle="Camions" valeur={`${camions.length}`} detail={`sur ${lot.nb_camions_prevu} prévus`} />
