@@ -14,7 +14,7 @@ import {
   Truck,
 } from 'lucide-react'
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
-import { progressionLot, tonnage } from '@/lib/workflow'
+import { progressionLot, tonnage, tonnageLivre } from '@/lib/workflow'
 import { depuis, formatTonnage } from '@/lib/utils'
 import { Carte, EtatVide, Progression, Squelette, Statistique } from '@/components/ui'
 import { CarteCamion } from '@/components/CarteCamion'
@@ -197,6 +197,7 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
           {lots.map((lot) => {
             const camionsLot = camions.filter((c) => c.lot_id === lot.id)
             const progression = progressionLot(camionsLot)
+            const livre = tonnageLivre(camionsLot)
             return (
               <Link key={lot.id} to={`/lots/${lot.id}`}>
                 <Carte className="p-4 transition-all hover:border-ardoise-300 hover:shadow-md">
@@ -219,6 +220,9 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
                       {camionsLot.length} camion{camionsLot.length > 1 ? 's' : ''}
                     </span>
                     <span>· {formatTonnage(tonnage(camionsLot))}</span>
+                    <span className="font-medium text-emerald-600">
+                      · {formatTonnage(livre)} / {formatTonnage(lot.quantite_planifiee_t)} livré
+                    </span>
                     {camionsLot.some((c) => c.statut === 'BLOQUE') && (
                       <span className="font-medium text-red-600">· blocage en cours</span>
                     )}

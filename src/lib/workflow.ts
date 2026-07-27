@@ -124,6 +124,16 @@ export function tonnage(camions: Camion[]): number {
     .reduce((s, c) => s + Number(c.tonnage_net_t), 0)
 }
 
+/**
+ * Tonnage déjà livré d'un lot : somme du tonnage net des camions dont le
+ * dossier est clôturé (statut TERMINE).
+ */
+export function tonnageLivre(camions: Camion[]): number {
+  return camions
+    .filter((c) => c.statut === 'TERMINE')
+    .reduce((s, c) => s + Number(c.tonnage_net_t), 0)
+}
+
 /* ------------------------------------------------------------------ */
 /* SLA et retard                                                       */
 /* ------------------------------------------------------------------ */
