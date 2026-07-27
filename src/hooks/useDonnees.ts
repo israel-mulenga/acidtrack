@@ -9,7 +9,7 @@
  *    incidents), chargé à l'ouverture de la fiche.
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { estEnRetard } from '@/lib/workflow'
 import type {
@@ -232,6 +232,50 @@ export function usePortefeuille() {
 
 /** Portefeuille + état de chargement, tel que consommé par les écrans. */
 export type PortefeuilleComplet = ReturnType<typeof usePortefeuille>
+
+/* ------------------------------------------------------------------ */
+/* Notifications temps réel (complément aux notifications push)        */
+/* ------------------------------------------------------------------ */
+
+export interface NotificationRealtime {
+  id: string
+  organisation_id: string
+  titre: string
+  corps: string
+  table_source: string
+  operation: string
+}
+
+/**
+ * Écoute les insertions de `notifications` (Realtime) et invoque `surNouvelle`
+ * pour chacune. Sert à afficher un toast in-app aux utilisateurs qui ont
+ * l'application ouverte, en complément des notifications push (application
+ * fermée). La RLS restreint déjà le flux à l'organisation du compte connecté.
+ */
+export function useNotificationsRealtime(
+  surNouvelle: (notification: NotificationRealtime) => void,
+) {
+  const rappel = useRef(surNouvelle)
+
+  useEffect(() => {
+    rappel.current = surNouvelle
+  }, [surNouvelle])
+
+  useEffect(() => {
+    const canal = supabase
+      .channel('notifications')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications' },
+        (charge) => rappel.current(charge.new as NotificationRealtime),
+      )
+      .subscribe()
+
+    return () => {
+      void supabase.removeChannel(canal)
+    }
+  }, [])
+}
 
 /* ------------------------------------------------------------------ */
 /* Dossier d'un camion                                                 */

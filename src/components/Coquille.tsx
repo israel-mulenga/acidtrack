@@ -3,11 +3,13 @@
  * La navigation s'adapte au rôle : le client ne voit que son portail.
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import {
   AlertTriangle,
+  Bell,
+  BellOff,
   Check,
   ChevronDown,
   Container,
@@ -20,9 +22,17 @@ import {
   X,
 } from 'lucide-react'
 import { useSession } from '@/session'
+import { useNotificationsRealtime } from '@/hooks/useDonnees'
 import { PROFILS, type CompteDemo } from '@/lib/profils'
 import { INTITULES_ROLE } from '@/lib/workflow'
 import { cn, initiales } from '@/lib/utils'
+import {
+  activerNotifications,
+  desactiverNotifications,
+  estAbonne,
+  permissionNotification,
+  pushEstSupporte,
+} from '@/lib/push'
 import { useToast } from './Toast'
 import {
   estAppareilIOS,
@@ -41,12 +51,56 @@ const ICONE_ROLE: Record<string, ReactNode> = {
 
 /** Menu du compte connecté : déconnexion, et bascule démo en développement. */
 function MenuCompte() {
-  const { profil, deconnecter, basculeDemoActive, basculerProfilDemo } = useSession()
+  const { session, profil, deconnecter, basculeDemoActive, basculerProfilDemo } = useSession()
   const installation = useInstallation()
   const toast = useToast()
   const [ouvert, setOuvert] = useState(false)
   const [enCours, setEnCours] = useState(false)
   const [instructionsIOS, setInstructionsIOS] = useState(false)
+
+  const notifsSupportees = pushEstSupporte()
+  const [notifsActives, setNotifsActives] = useState(false)
+  const [notifsEnCours, setNotifsEnCours] = useState(false)
+
+  useEffect(() => {
+    if (!notifsSupportees) return
+    let actif = true
+    void estAbonne().then((abonne) => {
+      if (actif) setNotifsActives(abonne && permissionNotification() === 'granted')
+    })
+    return () => {
+      actif = false
+    }
+  }, [notifsSupportees])
+
+  const basculerNotifications = async () => {
+    if (!profil || notifsEnCours) return
+    setNotifsEnCours(true)
+    try {
+      if (notifsActives) {
+        await desactiverNotifications()
+        setNotifsActives(false)
+        toast.succes('Notifications désactivées.')
+        return
+      }
+      const authId = profil.auth_id ?? session?.user.id
+      if (!authId) {
+        toast.erreur('Session incomplète : reconnectez-vous pour activer les notifications.')
+        return
+      }
+      const active = await activerNotifications(profil.organisation_id, authId, profil.id)
+      if (active) {
+        setNotifsActives(true)
+        toast.succes('Notifications activées pour cette organisation.')
+      } else {
+        toast.erreur('Permission de notification refusée par le navigateur.')
+      }
+    } catch (e) {
+      toast.erreur(e instanceof Error ? e.message : 'Activation des notifications impossible.')
+    } finally {
+      setNotifsEnCours(false)
+    }
+  }
 
   if (!profil) return null
 
@@ -140,6 +194,27 @@ function MenuCompte() {
                 ))}
               </>
             )}
+            {notifsSupportees && (
+              <button
+                onClick={() => void basculerNotifications()}
+                disabled={notifsEnCours}
+                className="flex w-full items-center gap-3 border-t border-ardoise-100 px-3 py-2.5 text-left text-sm font-medium text-ardoise-700 transition-colors hover:bg-ardoise-50 disabled:opacity-50"
+              >
+                <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-ardoise-100 text-ardoise-600">
+                  {notifsActives ? <BellOff className="size-4" /> : <Bell className="size-4" />}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block">
+                    {notifsActives ? 'Désactiver les notifications' : 'Activer les notifications'}
+                  </span>
+                  <span className="block truncate text-xs font-normal text-ardoise-400">
+                    {notifsActives
+                      ? 'Alertes push activées sur cet appareil'
+                      : 'Être alerté des changements de l’organisation'}
+                  </span>
+                </span>
+              </button>
+            )}
             {!estDejaInstallee() && !instructionsIOS && (
               <button
                 onClick={installerApplication}
@@ -196,6 +271,13 @@ export function Coquille({
 }) {
   const { estClient } = useSession()
   const { pathname } = useLocation()
+  const toast = useToast()
+
+  // Complément in-app aux notifications push : un toast pour les
+  // utilisateurs qui ont déjà l'application ouverte.
+  useNotificationsRealtime((notification) => {
+    toast.succes(`${notification.titre} — ${notification.corps}`)
+  })
 
   return (
     <div className="flex min-h-dvh flex-col bg-ardoise-50">
