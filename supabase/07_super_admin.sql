@@ -90,11 +90,16 @@ begin
       (
         c.statut not in ('TERMINE', 'ANNULE')
         and (de.statut is distinct from 'EN_ATTENTE_VALIDATION')
-        and er.sla_heures is not null
-        and extract(epoch from (now() - c.derniere_maj_at)) / 3600 > er.sla_heures
+        and mel.sla_heures is not null
+        and extract(epoch from (now() - c.derniere_maj_at)) / 3600 > mel.sla_heures
       ) as en_retard
     from camions c
-    left join etapes_referentiel er on er.numero = c.etape_courante
+    join lots l on l.id = c.lot_id
+    -- Le SLA vit dans le modèle d'étapes du lot (cf. 03_crud.sql, qui a
+    -- remplacé la table globale `etapes_referentiel` par `modeles_etapes_lignes`).
+    left join modeles_etapes_lignes mel
+      on mel.modele_id = l.modele_etapes_id
+     and mel.numero = c.etape_courante
     left join dernier_evt de on de.camion_id = c.id
   )
   select
