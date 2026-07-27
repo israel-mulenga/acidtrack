@@ -49,10 +49,13 @@ npm run dev
    - `supabase/06_notifications.sql` — notifications push : tables
      `push_subscriptions` / `notifications`, RLS, trigger CRUD générique et
      déclenchement de l'Edge Function (voir « Notifications push » ci-dessous)
+   - `supabase/07_super_admin.sql` — superviseur plateforme : table
+     `plateforme_admins` et fonctions de supervision multi-organisations
+     (voir « Superviseur plateforme » ci-dessous)
 
    > L'ordre est important : `04` ajoute la colonne `utilisateurs.auth_id`
-   > qu'utilise `05`. Si vous repartez d'une base vierge, rejouez les six
-   > scripts dans l'ordre `01` → `06`.
+   > qu'utilise `05`. Si vous repartez d'une base vierge, rejouez les sept
+   > scripts dans l'ordre `01` → `07`.
 4. Dans **Project Settings → API**, copier `Project URL` et la clé `anon public`
    dans `.env.local`.
 
@@ -124,6 +127,7 @@ supabase/
   04_auth_rls.sql   Auth Supabase, RPC organisation/invitation, RLS multi-tenant
   05_seed_auth.sql  Comptes Auth des profils de démonstration
   06_notifications.sql  Tables push, trigger CRUD, déclenchement Edge Function
+  07_super_admin.sql    Superviseur plateforme (supervision multi-organisations)
   functions/
     envoyer-push/   Edge Function Deno d'envoi des Web Push
 ```
@@ -245,3 +249,31 @@ n'est jamais exécutée. Vérifier dans l'ordre :
    et l'abonnement présent dans `push_subscriptions`.
 4. **Système d'exploitation** : sur iOS, PWA **installée** requise ; sur macOS,
    autoriser les notifications de Chrome/Safari dans Réglages Système.
+
+---
+
+## Superviseur plateforme
+
+Un **super-admin** (superviseur) supervise **toutes les organisations** en
+lecture seule. Il n'appartient à aucune organisation : il n'a **pas** de ligne
+`utilisateurs`. À la connexion, l'application ne lui présente que le **panneau
+de supervision** (`src/pages/PanneauAdmin.tsx`) — tableau de bord agrégé par
+organisation et liste des utilisateurs de chaque organisation.
+
+L'isolation par organisation (`04_auth_rls.sql`) reste intacte : l'accès
+transverse passe uniquement par des fonctions `SECURITY DEFINER`
+(`admin_tableau_bord()`, `admin_utilisateurs()`) protégées par
+`est_super_admin()`.
+
+**Créer un superviseur** :
+
+1. Créer un compte Supabase Auth pour le superviseur (Dashboard →
+   Authentication → Add user), **sans** l'inviter dans une organisation.
+2. Récupérer son `id` dans `auth.users`, puis dans SQL Editor :
+
+   ```sql
+   insert into plateforme_admins (auth_id, nom, email)
+   values ('<AUTH_USER_ID>', 'Superviseur', 'superviseur@acidtrack.app');
+   ```
+
+À sa prochaine connexion, il arrive directement sur le panneau de supervision.
