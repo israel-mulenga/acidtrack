@@ -7,6 +7,7 @@
  */
 
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Building2,
   ClipboardList,
@@ -54,55 +55,56 @@ interface Section {
 const SECTIONS: Section[] = [
   {
     cle: 'commandes',
-    libelle: 'Commandes',
+    libelle: 'commandes',
     icone: <ClipboardList className="size-4" />,
     droit: 'administrer_commercial',
   },
   {
     cle: 'lots',
-    libelle: 'Lots et camions',
+    libelle: 'lots',
     icone: <Package className="size-4" />,
     droit: 'administrer_commercial',
   },
   {
     cle: 'clients',
-    libelle: 'Clients',
+    libelle: 'clients',
     icone: <Building2 className="size-4" />,
     droit: 'administrer_referentiel',
   },
   {
     cle: 'points',
-    libelle: 'Points de chargement',
+    libelle: 'points',
     icone: <MapPin className="size-4" />,
     droit: 'administrer_referentiel',
   },
   {
     cle: 'itineraires',
-    libelle: 'Itinéraires',
+    libelle: 'itineraires',
     icone: <Route className="size-4" />,
     droit: 'administrer_referentiel',
   },
   {
     cle: 'modeles',
-    libelle: 'Modèles d’étapes',
+    libelle: 'modeles',
     icone: <Workflow className="size-4" />,
     droit: 'administrer_referentiel',
   },
   {
     cle: 'utilisateurs',
-    libelle: 'Utilisateurs',
+    libelle: 'utilisateurs',
     icone: <Users className="size-4" />,
     droit: 'administrer_utilisateurs',
   },
   {
     cle: 'organisations',
-    libelle: 'Organisations',
+    libelle: 'organisations',
     icone: <Building2 className="size-4" />,
     droit: 'administrer_utilisateurs',
   },
 ]
 
 export function Administration({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
+  const { t } = useTranslation(['common', 'workflow'])
   const { peut } = useSession()
   const toast = useToast()
 
@@ -113,8 +115,8 @@ export function Administration({ portefeuille }: { portefeuille: PortefeuilleCom
   if (disponibles.length === 0) {
     return (
       <EtatVide
-        titre="Accès non autorisé"
-        description="Votre profil ne dispose pas des droits d’administration."
+        titre={t('admin.accessDenied.title')}
+        description={t('admin.accessDenied.description')}
       />
     )
   }
@@ -152,10 +154,8 @@ export function Administration({ portefeuille }: { portefeuille: PortefeuilleCom
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight text-ardoise-900">Administration</h1>
-        <p className="text-sm text-ardoise-500">
-          Référentiel et hiérarchie commerciale. Aucune donnée ne nécessite de script SQL.
-        </p>
+        <h1 className="text-lg font-semibold tracking-tight text-ardoise-900">{t('navigation.administration')}</h1>
+        <p className="text-sm text-ardoise-500">{t('admin.description')}</p>
       </div>
 
       {/* Sous-navigation */}
@@ -172,7 +172,7 @@ export function Administration({ portefeuille }: { portefeuille: PortefeuilleCom
             )}
           >
             {section.icone}
-            {section.libelle}
+            {t(`adminSections.${section.libelle}`)}
           </button>
         ))}
       </div>

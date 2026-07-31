@@ -24,6 +24,8 @@ import { useSession } from '@/session'
 import type { RoleUtilisateur } from '@/lib/types'
 import { formatTonnage } from '@/lib/utils'
 import { Carte, EtatVide, Encart, Squelette, Statistique } from '@/components/ui'
+import { useTranslation } from 'react-i18next'
+
 
 interface LigneTableauBord {
   organisation_id: string
@@ -61,6 +63,8 @@ export function PanneauAdmin() {
   const [erreur, setErreur] = useState<string | null>(null)
   const [organisations, setOrganisations] = useState<LigneTableauBord[]>([])
   const [utilisateurs, setUtilisateurs] = useState<LigneUtilisateur[]>([])
+  const { t } = useTranslation(['common', 'workflow'])
+  
 
   useEffect(() => {
     let actif = true
@@ -177,7 +181,7 @@ export function PanneauAdmin() {
                 icone={<Truck className="size-4" />}
               />
               <Statistique
-                libelle="Tonnage livré"
+                libelle={t('dasboard.deliveredTonnage')}
                 valeur={formatTonnage(totaux.tonnageLivre)}
                 ton="succes"
                 icone={<Package className="size-4" />}

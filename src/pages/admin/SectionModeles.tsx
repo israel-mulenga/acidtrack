@@ -7,6 +7,7 @@
  */
 
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Copy, Star, Workflow } from 'lucide-react'
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
 import { useUtilisateur } from '@/session'
@@ -60,6 +61,7 @@ function analyserChamps(valeur: unknown): { champs: ChampEtape[] } | { erreur: s
 export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
   const profil = useUtilisateur()
   const toast = useToast()
+  const { t } = useTranslation(['common', 'workflow'])
   const [choix, setChoix] = useState<string | null>(null)
 
   // Sélection courante dérivée : le choix explicite s'il reste valide,
@@ -86,17 +88,17 @@ export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleCom
     <div className="space-y-6">
       {/* Liste des modèles */}
       <CrudRessource<ModeleEtapes>
-        titre="Modèles d’étapes"
-        description="Un modèle décrit une séquence complète. Rattachez-le à un itinéraire pour l’appliquer aux lots concernés."
+        titre={t('adminModeles.title')}
+        description={t('adminModeles.description')}
         icone={<Workflow className="size-5 text-ardoise-400" />}
-        libelleCreation="Nouveau modèle"
+        libelleCreation={t('adminModeles.create')}
         elements={portefeuille.modeles}
         rechercheDans={(m) => m.nom}
         libelleElement={(m) => m.nom}
         colonnes={[
           {
             cle: 'nom',
-            libelle: 'Modèle',
+            libelle: t('adminModeles.model'),
             rendu: (m) => (
               <button
                 onClick={() => setChoix(m.id)}
@@ -111,7 +113,7 @@ export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleCom
           },
           {
             cle: 'etapes',
-            libelle: 'Étapes',
+            libelle: t('adminModeles.steps'),
             rendu: (m) => (
               <span className="tabular-nums">
                 {(portefeuille.etapesParModele[m.id] ?? []).length} / 7
@@ -120,7 +122,7 @@ export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleCom
           },
           {
             cle: 'defaut',
-            libelle: 'Par défaut',
+            libelle: t('adminModeles.default'),
             rendu: (m) =>
               m.par_defaut ? (
                 <span className="inline-flex items-center gap-1 text-emerald-600">
@@ -140,11 +142,11 @@ export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleCom
                 onClick={() =>
                   void agir(
                     () => definirModeleParDefaut(m.id, m.organisation_id),
-                    `« ${m.nom} » devient le modèle par défaut.`,
+                    t('adminModeles.modelDefaultChanged', { name: m.nom }),
                   )
                 }
-                title="Définir comme modèle par défaut"
-                aria-label={`Définir ${m.nom} comme modèle par défaut`}
+                title={t('adminModeles.defaultModel')}
+                aria-label={t('adminModeles.defaultModel')}
                 className="rounded-md p-1.5 text-ardoise-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
               >
                 <Star className="size-4" />
@@ -154,11 +156,11 @@ export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleCom
               onClick={() =>
                 void agir(
                   () => dupliquerModele(m.id, m.organisation_id, `${m.nom} (copie)`),
-                  'Modèle dupliqué avec ses étapes.',
+                  t('adminModeles.modelDuplicated'),
                 )
               }
-              title="Dupliquer le modèle et ses étapes"
-              aria-label={`Dupliquer ${m.nom}`}
+              title={t('adminModeles.duplicate')}
+              aria-label={t('adminModeles.duplicate')}
               className="rounded-md p-1.5 text-ardoise-400 transition-colors hover:bg-ardoise-100 hover:text-ardoise-900"
             >
               <Copy className="size-4" />
@@ -166,9 +168,9 @@ export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleCom
           </>
         )}
         champs={() => [
-          { cle: 'nom', libelle: 'Nom du modèle', type: 'texte', obligatoire: true },
-          { cle: 'description', libelle: 'Description', type: 'zone' },
-          { cle: 'actif', libelle: 'Modèle actif', type: 'booleen' },
+          { cle: 'nom', libelle: t('adminModeles.name'), type: 'texte', obligatoire: true },
+          { cle: 'description', libelle: t('adminModeles.descriptionLabel'), type: 'zone' },
+          { cle: 'actif', libelle: t('adminModeles.active'), type: 'booleen' },
         ]}
         valeursInitiales={(m) => ({
           nom: m?.nom ?? '',
@@ -184,17 +186,17 @@ export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleCom
           }
           if (element) await modifier('modeles_etapes', element.id, ligne)
           else await creer('modeles_etapes', ligne)
-          toast.succes(element ? 'Modèle mis à jour.' : 'Modèle créé.')
+          toast.succes(element ? t('adminModeles.modelUpdated') : t('adminModeles.modelCreated'))
           await portefeuille.recharger()
         }}
         onSupprimer={async (m) => {
           if (m.par_defaut) {
             throw new ErreurMetier(
-              'Le modèle par défaut ne peut pas être supprimé. Désignez d’abord un autre modèle par défaut.',
+              t('adminModeles.defaultModelCannotDelete'),
             )
           }
           await supprimer('modeles_etapes', m.id)
-          toast.succes('Modèle supprimé.')
+          toast.succes(t('adminModeles.modelDeleted'))
           await portefeuille.recharger()
         }}
       />
@@ -204,15 +206,17 @@ export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleCom
         <Carte className="p-4 sm:p-5">
           {etapes.length < 7 && (
             <Encart ton="alerte" className="mb-4">
-              Ce modèle compte {etapes.length} étape{etapes.length > 1 ? 's' : ''} sur 7. Les
-              dossiers qui l’utilisent ne pourront pas aller au-delà de la dernière étape définie.
+              {t('adminModeles.stepCountWarning', {
+                count: etapes.length,
+                plural: etapes.length > 1 ? 's' : '',
+              })}
             </Encart>
           )}
 
           <CrudRessource<EtapeReferentiel>
-            titre={`Étapes — ${portefeuille.modeles.find((m) => m.id === modeleActif)?.nom ?? ''}`}
-            description="Le SLA déclenche le statut « en retard ». Les documents requis bloquent la clôture de l’étape."
-            libelleCreation="Nouvelle étape"
+            titre={t('adminModeles.stepsTitle', { name: portefeuille.modeles.find((m) => m.id === modeleActif)?.nom ?? '' })}
+            description={t('adminModeles.stepsDescription')}
+            libelleCreation={t('adminModeles.createStep')}
             elements={etapes}
             rechercheDans={(e) => `${e.numero} ${e.libelle} ${e.code}`}
             libelleElement={(e) => `Étape ${e.numero} — ${e.libelle}`}
@@ -226,14 +230,14 @@ export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleCom
               },
               {
                 cle: 'libelle',
-                libelle: 'Étape',
+                libelle: t('adminModeles.step'),
                 rendu: (e) => (
                   <span className="font-medium text-ardoise-900">{e.libelle}</span>
                 ),
               },
               {
                 cle: 'responsable',
-                libelle: 'Responsable',
+                libelle: t('adminModeles.responsible'),
                 rendu: (e) => e.responsable || '—',
                 masquerMobile: true,
               },
@@ -244,10 +248,10 @@ export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleCom
               },
               {
                 cle: 'documents',
-                libelle: 'Documents bloquants',
+                libelle: t('adminModeles.blockingDocuments'),
                 rendu: (e) =>
                   e.documents_requis.length === 0 ? (
-                    <span className="text-ardoise-400">Aucun</span>
+                    <span className="text-ardoise-400">{t('adminModeles.none')}</span>
                   ) : (
                     <span className="text-xs text-ardoise-500">
                       {e.documents_requis.map(libelleDocument).join(', ')}
@@ -257,32 +261,31 @@ export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleCom
               },
               {
                 cle: 'champs',
-                libelle: 'Champs',
+                libelle: t('adminModeles.fields'),
                 rendu: (e) => <span className="tabular-nums">{e.champs.length}</span>,
                 masquerMobile: true,
               },
             ]}
             champs={() => [
-              { cle: 'numero', libelle: 'Numéro (1 à 7)', type: 'nombre', obligatoire: true },
-              { cle: 'code', libelle: 'Code', type: 'texte', obligatoire: true },
-              { cle: 'libelle', libelle: 'Libellé', type: 'texte', obligatoire: true },
-              { cle: 'responsable', libelle: 'Responsable', type: 'texte' },
-              { cle: 'sla_heures', libelle: 'SLA', type: 'nombre', unite: 'h', obligatoire: true },
-              { cle: 'objectif', libelle: 'Objectif', type: 'zone' },
+              { cle: 'numero', libelle: t('adminModeles.number'), type: 'nombre', obligatoire: true },
+              { cle: 'code', libelle: t('adminModeles.code'), type: 'texte', obligatoire: true },
+              { cle: 'libelle', libelle: t('adminModeles.label'), type: 'texte', obligatoire: true },
+              { cle: 'responsable', libelle: t('adminModeles.responsible'), type: 'texte' },
+              { cle: 'sla_heures', libelle: t('adminModeles.sla'), type: 'nombre', unite: 'h', obligatoire: true },
+              { cle: 'objectif', libelle: t('adminModeles.objective'), type: 'zone' },
               {
                 cle: 'documents_requis',
-                libelle: 'Documents requis',
+                libelle: t('adminModeles.requiredDocuments'),
                 type: 'texte',
                 pleineLargeur: true,
-                aide: 'Codes séparés par des virgules. Ex. : BL, TICKET_PESEE, COA',
+                aide: t('adminModeles.requiredDocumentsExplanation'),
               },
               {
                 cle: 'champs',
-                libelle: 'Champs métier (JSON)',
+                libelle: t('adminModeles.businessFields'),
                 type: 'zone',
-                aide:
-                  'Tableau d’objets { "cle", "libelle", "type", "obligatoire", "unite", "options" }. ' +
-                  'Types acceptés : text, number, date, datetime, select, textarea.',
+                aide: t('adminModeles.businessFieldsExplanation'),
+                  
               },
             ]}
             valeursInitiales={(e) => ({
@@ -299,12 +302,12 @@ export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleCom
               const erreurs: string[] = []
               const numero = Number(v.numero)
               if (!Number.isInteger(numero) || numero < 1 || numero > 7) {
-                erreurs.push('Le numéro d’étape doit être un entier compris entre 1 et 7.')
+                erreurs.push(t('adminModeles.stepNumberError'))
               } else if (etapes.some((e) => e.numero === numero && e.id !== element?.id)) {
-                erreurs.push(`L’étape ${numero} est déjà définie dans ce modèle.`)
+                erreurs.push(t('adminModeles.stepAlreadyDefined', { number: numero }))
               }
               if (Number(v.sla_heures) <= 0) {
-                erreurs.push('Le SLA doit être supérieur à zéro.')
+                erreurs.push(t('adminModeles.slaRequired'))
               }
               const analyse = analyserChamps(v.champs)
               if ('erreur' in analyse) erreurs.push(analyse.erreur)
@@ -327,12 +330,12 @@ export function SectionModeles({ portefeuille }: { portefeuille: PortefeuilleCom
               }
               if (element) await modifier('modeles_etapes_lignes', element.id, ligne)
               else await creer('modeles_etapes_lignes', ligne)
-              toast.succes(element ? 'Étape mise à jour.' : 'Étape ajoutée au modèle.')
+              toast.succes(element ? t('adminModeles.stepUpdated') : t('adminModeles.stepCreated'))
               await portefeuille.recharger()
             }}
             onSupprimer={async (e) => {
               await supprimer('modeles_etapes_lignes', e.id)
-              toast.succes('Étape supprimée.')
+              toast.succes(t('adminModeles.stepDeleted'))
               await portefeuille.recharger()
             }}
           />
