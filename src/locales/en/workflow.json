@@ -1,0 +1,60 @@
+{
+  "statuts": {
+    "etape": {
+      "PLANIFIE": "Planned",
+      "EN_ATTENTE_ACTION": "Awaiting action",
+      "EN_COURS": "In progress",
+      "EN_ATTENTE_VALIDATION": "Pending validation",
+      "TERMINE": "Completed",
+      "BLOQUE": "Blocked",
+      "EN_RETARD": "Delayed",
+      "ANNULE": "Cancelled"
+    },
+    "client": {
+      "PLANIFIE": "Upcoming",
+      "EN_ATTENTE_ACTION": "To process",
+      "EN_COURS": "In progress",
+      "EN_ATTENTE_VALIDATION": "Under review",
+      "TERMINE": "Completed",
+      "BLOQUE": "Attention required",
+      "EN_RETARD": "Delayed",
+      "ANNULE": "Cancelled"
+    },
+    "camion": {
+      "EN_COURS": "In progress",
+      "TERMINE": "Completed",
+      "BLOQUE": "Blocked",
+      "ANNULE": "Cancelled"
+    }
+  },
+  "roles": {
+    "ADMIN": "Administrator",
+    "OPS": "Operations lead",
+    "TERRAIN": "Field agent",
+    "FINANCE": "Finance",
+    "CLIENT": "Client"
+  },
+  "documents": {
+    "BL": "Delivery note",
+    "TICKET_PESEE": "Weighbridge ticket",
+    "COA": "Certificate of analysis (CoA)",
+    "AVIS_BANCAIRE": "Bank notice",
+    "DECLARATION_EXPORT": "Export declaration",
+    "CMR": "CMR / Waybill",
+    "DECLARATION_IMPORT": "Import declaration",
+    "QUITTANCE": "Customs receipt",
+    "RECU_PEAGE": "Toll receipt",
+    "POD": "Proof of delivery (POD)",
+    "TICKET_PESEE_MINE": "Mine weigh ticket",
+    "FACTURE_FINALE": "Final invoice",
+    "PREUVE_SOLDE": "Settlement proof",
+    "PHOTO": "Photo",
+    "AUTRE": "Other document"
+  },
+  "gravites": {
+    "FAIBLE": "Low",
+    "MOYENNE": "Medium",
+    "ELEVEE": "High",
+    "CRITIQUE": "Critical"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "statuts": {
+    "etape": {
+      "PLANIFIE": "Planifié",
+      "EN_ATTENTE_ACTION": "En attente d’action",
+      "EN_COURS": "En cours",
+      "EN_ATTENTE_VALIDATION": "En attente de validation",
+      "TERMINE": "Terminé",
+      "BLOQUE": "Bloqué",
+      "EN_RETARD": "En retard",
+      "ANNULE": "Annulé"
+    },
+    "client": {
+      "PLANIFIE": "À venir",
+      "EN_ATTENTE_ACTION": "À traiter",
+      "EN_COURS": "En cours",
+      "EN_ATTENTE_VALIDATION": "En vérification",
+      "TERMINE": "Terminé",
+      "BLOQUE": "Attention requise",
+      "EN_RETARD": "En retard",
+      "ANNULE": "Annulé"
+    },
+    "camion": {
+      "EN_COURS": "En cours",
+      "TERMINE": "Terminé",
+      "BLOQUE": "Bloqué",
+      "ANNULE": "Annulé"
+    }
+  },
+  "roles": {
+    "ADMIN": "Administrateur",
+    "OPS": "Responsable opérations",
+    "TERRAIN": "Agent terrain",
+    "FINANCE": "Finance",
+    "CLIENT": "Client"
+  },
+  "documents": {
+    "BL": "Bon de livraison",
+    "TICKET_PESEE": "Ticket de pesée",
+    "COA": "Certificat d’analyse (CoA)",
+    "AVIS_BANCAIRE": "Avis bancaire",
+    "DECLARATION_EXPORT": "Déclaration export",
+    "CMR": "CMR / Lettre de voiture",
+    "DECLARATION_IMPORT": "Déclaration import",
+    "QUITTANCE": "Quittance douanière",
+    "RECU_PEAGE": "Reçu de péage",
+    "POD": "Preuve de livraison (POD)",
+    "TICKET_PESEE_MINE": "Ticket de pesée mine",
+    "FACTURE_FINALE": "Facture finale",
+    "PREUVE_SOLDE": "Preuve de règlement du solde",
+    "PHOTO": "Photo",
+    "AUTRE": "Autre document"
+  },
+  "gravites": {
+    "FAIBLE": "Faible",
+    "MOYENNE": "Moyenne",
+    "ELEVEE": "Élevée",
+    "CRITIQUE": "Critique"
+  }
+}

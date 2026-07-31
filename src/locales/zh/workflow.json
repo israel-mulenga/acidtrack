@@ -1,0 +1,60 @@
+{
+  "statuts": {
+    "etape": {
+      "PLANIFIE": "已计划",
+      "EN_ATTENTE_ACTION": "待处理",
+      "EN_COURS": "进行中",
+      "EN_ATTENTE_VALIDATION": "待验证",
+      "TERMINE": "已完成",
+      "BLOQUE": "已阻塞",
+      "EN_RETARD": "已延迟",
+      "ANNULE": "已取消"
+    },
+    "client": {
+      "PLANIFIE": "即将到来",
+      "EN_ATTENTE_ACTION": "待处理",
+      "EN_COURS": "进行中",
+      "EN_ATTENTE_VALIDATION": "审核中",
+      "TERMINE": "已完成",
+      "BLOQUE": "需要关注",
+      "EN_RETARD": "已延迟",
+      "ANNULE": "已取消"
+    },
+    "camion": {
+      "EN_COURS": "进行中",
+      "TERMINE": "已完成",
+      "BLOQUE": "已阻塞",
+      "ANNULE": "已取消"
+    }
+  },
+  "roles": {
+    "ADMIN": "管理员",
+    "OPS": "运营负责人",
+    "TERRAIN": "现场代理",
+    "FINANCE": "财务",
+    "CLIENT": "客户"
+  },
+  "documents": {
+    "BL": "送货单",
+    "TICKET_PESEE": "过磅单",
+    "COA": "分析证书（CoA）",
+    "AVIS_BANCAIRE": "银行通知",
+    "DECLARATION_EXPORT": "出口申报",
+    "CMR": "CMR / 运输单",
+    "DECLARATION_IMPORT": "进口申报",
+    "QUITTANCE": "海关收据",
+    "RECU_PEAGE": "收费收据",
+    "POD": "交付证明（POD）",
+    "TICKET_PESEE_MINE": "矿山过磅单",
+    "FACTURE_FINALE": "最终发票",
+    "PREUVE_SOLDE": "结算凭证",
+    "PHOTO": "照片",
+    "AUTRE": "其他文件"
+  },
+  "gravites": {
+    "FAIBLE": "低",
+    "MOYENNE": "中",
+    "ELEVEE": "高",
+    "CRITIQUE": "严重"
+  }
+}

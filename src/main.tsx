@@ -5,6 +5,7 @@ import './index.css'
 import App from './App.tsx'
 import { SessionProvider } from './session.tsx'
 import { ToastProvider } from './components/Toast.tsx'
+import './i18n'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   AlertTriangle,
   Eye,
@@ -39,11 +40,13 @@ function RoutesPubliques() {
 
 export default function App() {
   const { chargement, session, profil, estSuperAdmin } = useSession()
+  const { t } = useTranslation('common')
 
   if (chargement) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-ardoise-50">
         <Loader2 className="size-6 animate-spin text-ardoise-400" />
+        <span className="ml-3 text-sm text-ardoise-500">{t('loading')}</span>
       </div>
     )
   }
@@ -66,23 +69,24 @@ export default function App() {
 function Application() {
   const portefeuille = usePortefeuille()
   const { estClient, profil, peut } = useSession()
+  const { t } = useTranslation('common')
   if (!profil) return null
 
   const ongletAdmin = {
     vers: '/administration',
-    libelle: 'Administration',
+    libelle: t('navigation.administration'),
     icone: <Settings className="size-5 sm:size-4" />,
   }
 
   // La navigation dépend du profil : le client n'accède qu'à son portail.
   const onglets = estClient
-    ? [{ vers: '/', libelle: 'Mes livraisons', icone: <Eye className="size-5 sm:size-4" /> }]
+    ? [{ vers: '/', libelle: t('navigation.myDeliveries'), icone: <Eye className="size-5 sm:size-4" /> }]
     : profil.role === 'TERRAIN'
       ? [
-          { vers: '/', libelle: 'Mes tâches', icone: <Truck className="size-5 sm:size-4" /> },
+          { vers: '/', libelle: t('navigation.myTasks'), icone: <Truck className="size-5 sm:size-4" /> },
           {
             vers: '/controle',
-            libelle: 'Tour de contrôle',
+            libelle: t('navigation.controlTour'),
             icone: <LayoutDashboard className="size-5 sm:size-4" />,
             pastille: portefeuille.nbExceptions,
           },
@@ -90,11 +94,11 @@ function Application() {
       : [
           {
             vers: '/',
-            libelle: 'Tour de contrôle',
+            libelle: t('navigation.controlTour'),
             icone: <LayoutDashboard className="size-5 sm:size-4" />,
             pastille: portefeuille.nbExceptions,
           },
-          { vers: '/taches', libelle: 'Mes tâches', icone: <Package className="size-5 sm:size-4" /> },
+          { vers: '/taches', libelle: t('navigation.myTasks'), icone: <Package className="size-5 sm:size-4" /> },
           ...(peut('administrer_commercial') || peut('administrer_referentiel')
             ? [ongletAdmin]
             : []),
@@ -106,7 +110,7 @@ function Application() {
         <div className="mb-4">
           <Encart
             ton="erreur"
-            titre="Connexion à la base impossible"
+            titre={t('errors.databaseConnection', { defaultValue: 'Connexion à la base impossible' })}
             icone={<AlertTriangle className="size-4" />}
           >
             {portefeuille.erreur}
