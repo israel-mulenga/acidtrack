@@ -7,6 +7,7 @@
  */
 
 import { useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Camera,
   Check,
@@ -75,6 +76,7 @@ export function ModaleEtape({
   autoValidation: boolean
   onSucces: (message: string) => void
 }) {
+  const { t } = useTranslation(['common', 'workflow'])
   /* --- État du formulaire ------------------------------------------ */
   const [valeurs, setValeurs] = useState<Record<string, string>>(
     () => dernierEvenement?.donnees ?? {},
@@ -169,10 +171,10 @@ export function ModaleEtape({
 
       onSucces(
         brouillon
-          ? 'Progression enregistrée sur l’étape en cours.'
+          ? t('stepModal.successDraft')
           : resultat.cloturee
-            ? `Étape ${etape.numero} validée. Le camion passe à l’étape suivante.`
-            : 'Étape soumise. Un responsable opérations doit maintenant l’approuver.',
+            ? t('stepModal.successCompleted', { number: etape.numero })
+            : t('stepModal.successSubmitted'),
       )
       onFermer()
     } catch (e) {
@@ -198,7 +200,7 @@ export function ModaleEtape({
             disabled={envoi}
             onClick={() => void soumettre(true)}
           >
-            Enregistrer
+            {t('stepModal.saveDraft')}
           </Bouton>
           <Bouton
             className="flex-[2]"
@@ -210,7 +212,7 @@ export function ModaleEtape({
             ) : (
               <Check className="size-4" />
             )}
-            {autoValidation ? 'Valider l’étape' : 'Soumettre pour validation'}
+            {autoValidation ? t('stepModal.submitAuto') : t('stepModal.submit')}
           </Bouton>
         </div>
       }
@@ -254,7 +256,7 @@ export function ModaleEtape({
                     value={valeurs[champ.cle] ?? ''}
                     onChange={(e) => majValeur(champ.cle, e.target.value)}
                   >
-                    <option value="">Sélectionner…</option>
+                    <option value="">{t('forms.selectPlaceholder')}</option>
                     {options.map((o) => (
                       <option key={o} value={o}>
                         {o}
@@ -298,7 +300,7 @@ export function ModaleEtape({
 
         {/* Preuves */}
         <div>
-          <Etiquette obligatoire={etape.documents_requis.length > 0}>Preuves</Etiquette>
+          <Etiquette obligatoire={etape.documents_requis.length > 0}>{t('stepModal.proofs')}</Etiquette>
 
           {/* Rappel des pièces obligatoires et de leur statut */}
           {etape.documents_requis.length > 0 && (
@@ -327,10 +329,10 @@ export function ModaleEtape({
             <Selection
               value={typePreuve}
               onChange={(e) => setTypePreuve(e.target.value)}
-              aria-label="Type de document"
+              aria-label={t('stepModal.documentType')}
               className="flex-1"
             >
-              <option value="">Type de document…</option>
+              <option value="">{t('stepModal.documentType')}…</option>
               {typesProposables.map((t) => (
                 <option key={t} value={t}>
                   {libelleDocument(t)}
@@ -344,7 +346,7 @@ export function ModaleEtape({
               aria-label="Joindre un fichier"
             >
               <Paperclip className="size-4" />
-              <span className="hidden sm:inline">Joindre</span>
+              <span className="hidden sm:inline">{t('stepModal.attachFile')}</span>
             </Bouton>
           </div>
 
@@ -364,7 +366,7 @@ export function ModaleEtape({
             className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-ardoise-200 bg-ardoise-50/50 py-3 text-sm text-ardoise-500 transition-colors hover:border-ardoise-300 hover:bg-ardoise-50"
           >
             <Camera className="size-4" />
-            Prendre une photo ou choisir un fichier
+            {t('stepModal.takePhoto')}
           </button>
 
           {preuves.length > 0 && (
@@ -384,7 +386,7 @@ export function ModaleEtape({
                   <button
                     type="button"
                     onClick={() => retirerPreuve(i)}
-                    aria-label="Retirer"
+                    aria-label={t('stepModal.remove')}
                     className="shrink-0 rounded-md p-1 text-ardoise-400 hover:bg-ardoise-100 hover:text-red-600"
                   >
                     <X className="size-4" />
@@ -397,12 +399,12 @@ export function ModaleEtape({
 
         {/* Position */}
         <div>
-          <Etiquette>Position</Etiquette>
+          <Etiquette>{t('stepModal.position')}</Etiquette>
           <div className="flex gap-2">
             <Champ
               value={lieuManuel}
               onChange={(e) => setLieuManuel(e.target.value)}
-              placeholder="Lieu (saisie manuelle)"
+              placeholder={t('stepModal.gpsPlaceholder')}
               className="flex-1"
             />
             <Bouton
@@ -410,7 +412,7 @@ export function ModaleEtape({
               type="button"
               onClick={() => void localiser()}
               disabled={gps}
-              aria-label="Capturer la position GPS"
+              aria-label={t('stepModal.positionGps')}
             >
               {gps ? (
                 <Loader2 className="size-4 animate-spin" />
@@ -422,26 +424,28 @@ export function ModaleEtape({
           </div>
           {position && (
             <p className="mt-1.5 text-xs text-emerald-600">
-              Position GPS capturée : {position.lat.toFixed(5)}, {position.lng.toFixed(5)}
+              {t('stepModal.gpsCaptured', {
+                lat: position.lat.toFixed(5),
+                lng: position.lng.toFixed(5),
+              })}
             </p>
           )}
         </div>
 
         {/* Commentaire */}
         <div>
-          <Etiquette htmlFor="commentaire">Commentaire</Etiquette>
+          <Etiquette htmlFor="commentaire">{t('stepModal.comment')}</Etiquette>
           <ZoneTexte
             id="commentaire"
             value={commentaire}
             onChange={(e) => setCommentaire(e.target.value)}
-            placeholder="Observation terrain, cause d’un retard, précision utile…"
+            placeholder={t('stepModal.commentPlaceholder')}
           />
         </div>
 
         {!autoValidation && (
           <p className="text-xs text-ardoise-500">
-            Votre soumission sera transmise aux opérations pour approbation : vous ne validez pas
-            votre propre saisie.
+            {t('stepModal.submissionNote')}
           </p>
         )}
       </div>

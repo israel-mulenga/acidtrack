@@ -3,6 +3,7 @@
  * action, triés par urgence. Conçue pour un usage à une main sur téléphone.
  */
 
+import { useTranslation } from 'react-i18next'
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
 import { CheckCircle2, ListTodo } from 'lucide-react'
 import { heuresDepuis } from '@/lib/workflow'
@@ -11,6 +12,7 @@ import { CarteCamion } from '@/components/CarteCamion'
 import { IndicateurTempsReel } from '@/components/Coquille'
 
 export function MesTaches({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
+  const { t } = useTranslation(['common', 'workflow'])
   if (portefeuille.chargement) {
     return (
       <div className="space-y-3">
@@ -48,9 +50,9 @@ export function MesTaches({ portefeuille }: { portefeuille: PortefeuilleComplet 
     <div className="space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight text-ardoise-900">Mes tâches</h1>
+          <h1 className="text-lg font-semibold tracking-tight text-ardoise-900">{t('navigation.myTasks')}</h1>
           <p className="text-sm text-ardoise-500">
-            {aTraiter.length} camion{aTraiter.length > 1 ? 's' : ''} en attente d’une mise à jour
+            {t('tasks.summary', { count: aTraiter.length })}
           </p>
         </div>
         <IndicateurTempsReel />
@@ -59,13 +61,13 @@ export function MesTaches({ portefeuille }: { portefeuille: PortefeuilleComplet 
       {aTraiter.length === 0 ? (
         <EtatVide
           icone={<CheckCircle2 className="size-10" />}
-          titre="Rien à traiter"
-          description="Toutes vos étapes sont à jour."
+          titre={t('tasks.empty.title')}
+          description={t('tasks.empty.description')}
         />
       ) : (
         <section>
           <h2 className="mb-2.5 flex items-center gap-2 font-semibold tracking-tight text-ardoise-900">
-            <ListTodo className="size-4 text-ambre-600" />À traiter
+            <ListTodo className="size-4 text-ambre-600" />{t('tasks.toProcess.title')}
           </h2>
           <div className="grid gap-3 md:grid-cols-2">
             {aTraiter.map((camion) => (
@@ -83,7 +85,7 @@ export function MesTaches({ portefeuille }: { portefeuille: PortefeuilleComplet 
       {soumis.length > 0 && (
         <section>
           <h2 className="mb-2.5 font-semibold tracking-tight text-ardoise-900">
-            En attente de validation
+            {t('tasks.pendingValidation.title')}
           </h2>
           <div className="grid gap-3 md:grid-cols-2">
             {soumis.map((camion) => (

@@ -5,6 +5,7 @@
  */
 
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Loader2, ShieldAlert } from 'lucide-react'
 import type { Camion, GraviteIncident } from '@/lib/types'
 import { ErreurMetier, ouvrirIncident } from '@/lib/actions'
@@ -12,22 +13,22 @@ import { cn } from '@/lib/utils'
 import { Bouton, Champ, Encart, Etiquette, Modale, Selection, ZoneTexte } from './ui'
 
 const CATEGORIES = [
-  { valeur: 'DOUANE', libelle: 'Blocage douane' },
-  { valeur: 'RETARD', libelle: 'Retard' },
-  { valeur: 'PANNE', libelle: 'Panne véhicule' },
-  { valeur: 'ACCIDENT', libelle: 'Accident' },
-  { valeur: 'DOCUMENT', libelle: 'Document manquant ou rejeté' },
-  { valeur: 'QUANTITE', libelle: 'Écart de quantité' },
-  { valeur: 'QUALITE', libelle: 'Non-conformité qualité' },
-  { valeur: 'SECURITE', libelle: 'Sécurité' },
-  { valeur: 'AUTRE', libelle: 'Autre' },
+  { valeur: 'DOUANE' },
+  { valeur: 'RETARD' },
+  { valeur: 'PANNE' },
+  { valeur: 'ACCIDENT' },
+  { valeur: 'DOCUMENT' },
+  { valeur: 'QUANTITE' },
+  { valeur: 'QUALITE' },
+  { valeur: 'SECURITE' },
+  { valeur: 'AUTRE' },
 ]
 
-const GRAVITES: { valeur: GraviteIncident; libelle: string; classe: string }[] = [
-  { valeur: 'FAIBLE', libelle: 'Faible', classe: 'bg-ardoise-100 text-ardoise-700 ring-ardoise-300' },
-  { valeur: 'MOYENNE', libelle: 'Moyenne', classe: 'bg-ambre-50 text-ambre-700 ring-ambre-300' },
-  { valeur: 'ELEVEE', libelle: 'Élevée', classe: 'bg-orange-50 text-orange-700 ring-orange-300' },
-  { valeur: 'CRITIQUE', libelle: 'Critique', classe: 'bg-red-50 text-red-700 ring-red-400' },
+const GRAVITES: { valeur: GraviteIncident; classe: string }[] = [
+  { valeur: 'FAIBLE', classe: 'bg-ardoise-100 text-ardoise-700 ring-ardoise-300' },
+  { valeur: 'MOYENNE', classe: 'bg-ambre-50 text-ambre-700 ring-ambre-300' },
+  { valeur: 'ELEVEE', classe: 'bg-orange-50 text-orange-700 ring-orange-300' },
+  { valeur: 'CRITIQUE', classe: 'bg-red-50 text-red-700 ring-red-400' },
 ]
 
 export function ModaleIncident({
@@ -43,6 +44,7 @@ export function ModaleIncident({
   auteur: string
   onSucces: (message: string) => void
 }) {
+  const { t } = useTranslation(['common', 'workflow'])
   const [categorie, setCategorie] = useState('DOUANE')
   const [gravite, setGravite] = useState<GraviteIncident>('MOYENNE')
   const [description, setDescription] = useState('')
@@ -76,8 +78,8 @@ export function ModaleIncident({
       })
       onSucces(
         gravite === 'CRITIQUE'
-          ? 'Incident critique enregistré : le camion passe en statut BLOQUÉ.'
-          : 'Incident enregistré et visible dans le dossier.',
+          ? t('incidentModal.successCritical')
+          : t('incidentModal.successStandard'),
       )
       reinitialiser()
       onFermer()
@@ -92,7 +94,7 @@ export function ModaleIncident({
     <Modale
       ouverte={ouverte}
       onFermer={onFermer}
-      titre="Signaler un incident"
+      titre={t('incidentModal.title')}
       sousTitre={`${camion.reference} · étape ${camion.etape_courante}`}
       pied={
         <Bouton
@@ -102,7 +104,7 @@ export function ModaleIncident({
           onClick={() => void enregistrer()}
         >
           {envoi ? <Loader2 className="size-4 animate-spin" /> : <ShieldAlert className="size-4" />}
-          Enregistrer l’incident
+          {t('incidentModal.save')}
         </Bouton>
       }
     >
@@ -111,7 +113,7 @@ export function ModaleIncident({
 
         <div>
           <Etiquette htmlFor="categorie" obligatoire>
-            Catégorie
+            {t('incidentModal.category')}
           </Etiquette>
           <Selection
             id="categorie"
@@ -120,14 +122,14 @@ export function ModaleIncident({
           >
             {CATEGORIES.map((c) => (
               <option key={c.valeur} value={c.valeur}>
-                {c.libelle}
+                {t(`incidentModal.categories.${c.valeur}`)}
               </option>
             ))}
           </Selection>
         </div>
 
         <div>
-          <Etiquette obligatoire>Gravité</Etiquette>
+          <Etiquette obligatoire>{t('incidentModal.gravity')}</Etiquette>
           <div className="grid grid-cols-4 gap-1.5">
             {GRAVITES.map((g) => (
               <button
@@ -141,7 +143,7 @@ export function ModaleIncident({
                     : 'bg-white text-ardoise-500 ring-ardoise-200 hover:bg-ardoise-50',
                 )}
               >
-                {g.libelle}
+                {t(`incidentModal.gravities.${g.valeur}`)}
               </button>
             ))}
           </div>
@@ -149,40 +151,39 @@ export function ModaleIncident({
 
         {gravite === 'CRITIQUE' && (
           <Encart ton="erreur" icone={<ShieldAlert className="size-4" />}>
-            Un incident critique bascule automatiquement le camion en statut{' '}
-            <strong>BLOQUÉ</strong> et suspend son avancement jusqu’à résolution.
+            {t('incidentModal.warning')}
           </Encart>
         )}
 
         <div>
           <Etiquette htmlFor="description" obligatoire>
-            Description
+            {t('incidentModal.description')}
           </Etiquette>
           <ZoneTexte
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Ce qui s’est passé, où, et depuis quand."
+            placeholder={t('incidentModal.descriptionPlaceholder')}
           />
         </div>
 
         <div>
-          <Etiquette htmlFor="responsable">Responsable du traitement</Etiquette>
+          <Etiquette htmlFor="responsable">{t('incidentModal.responsible')}</Etiquette>
           <Champ
             id="responsable"
             value={responsable}
             onChange={(e) => setResponsable(e.target.value)}
-            placeholder="Ex. : Copperfield Clearing"
+            placeholder={t('incidentModal.responsiblePlaceholder')}
           />
         </div>
 
         <div>
-          <Etiquette htmlFor="plan">Plan d’action</Etiquette>
+          <Etiquette htmlFor="plan">{t('incidentModal.actionPlan')}</Etiquette>
           <ZoneTexte
             id="plan"
             value={planAction}
             onChange={(e) => setPlanAction(e.target.value)}
-            placeholder="Prochaine action, échéance et interlocuteur."
+            placeholder={t('incidentModal.actionPlanPlaceholder')}
           />
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { AlertTriangle, ChevronRight, Clock, MapPin, TriangleAlert } from 'lucide-react'
 import type { Camion, EtapeReferentiel, Lot } from '@/lib/types'
 import {
@@ -25,6 +26,7 @@ export function CarteCamion({
   referentiel: EtapeReferentiel[]
   vueClient?: boolean
 }) {
+  const { t } = useTranslation(['common', 'workflow'])
   const progression = progressionCamion(camion)
   const etape = referentiel.find((e) => e.numero === camion.etape_courante)
   const enRetard = estEnRetard(camion, referentiel)
@@ -65,7 +67,7 @@ export function CarteCamion({
             ) : enRetard ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2 py-0.5 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-200">
                 <Clock className="size-3" />
-                En retard
+                {t('truckCard.delayed')}
               </span>
             ) : (
               <BadgeCamion statut={camion.statut} />
@@ -80,7 +82,7 @@ export function CarteCamion({
             <span className="font-medium tabular-nums text-ardoise-400">
               {Math.min(camion.etape_courante, NB_ETAPES)}/{NB_ETAPES}
             </span>{' '}
-            {etape?.libelle ?? 'Dossier clôturé'}
+            {etape?.libelle ?? t('truckCard.closed')}
           </p>
           <span className="shrink-0 text-sm font-semibold tabular-nums text-ardoise-900">
             {progression}%
@@ -103,9 +105,11 @@ export function CarteCamion({
 
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
           {/* La fraîcheur de la donnée est toujours explicite (§12.10) */}
-          <span className="text-ardoise-400">Mis à jour {depuis(camion.derniere_maj_at)}</span>
+          <span className="text-ardoise-400">
+            {t('truckCard.updated', { time: depuis(camion.derniere_maj_at) })}
+          </span>
           {camion.eta && camion.statut !== 'TERMINE' && (
-            <span className="text-ardoise-400">· ETA {jusqua(camion.eta)}</span>
+            <span className="text-ardoise-400">· {t('truckCard.eta', { time: jusqua(camion.eta) })}</span>
           )}
         </div>
 
@@ -113,13 +117,13 @@ export function CarteCamion({
         {camion.statut === 'BLOQUE' && (
           <p className="mt-3 flex items-center gap-1.5 rounded-md bg-red-100 px-2 py-1.5 text-xs font-medium text-red-800">
             <TriangleAlert className="size-3.5 shrink-0" />
-            {vueClient ? 'Blocage en cours de traitement par nos équipes' : 'Incident critique ouvert'}
+            {vueClient ? t('truckCard.blockInProgress') : t('truckCard.incidentOpen')}
           </p>
         )}
         {enRetard && camion.statut !== 'BLOQUE' && (
           <p className="mt-3 flex items-center gap-1.5 rounded-md bg-orange-100 px-2 py-1.5 text-xs font-medium text-orange-800">
             <AlertTriangle className="size-3.5 shrink-0" />
-            Délai de l’étape dépassé de {retard} h
+            {t('truckCard.delayExceeded', { hours: retard })}
           </p>
         )}
       </Carte>
