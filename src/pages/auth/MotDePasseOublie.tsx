@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Container, Loader2 } from 'lucide-react'
 import { demanderReinitialisation } from '@/lib/auth'
 import { Bouton, Carte, Champ, Encart, Etiquette } from '@/components/ui'
+import { LanguageSwitcher } from '@/i18n/LanguageSwitcher'
 
 export function MotDePasseOublie() {
+  const { t } = useTranslation('auth')
   const [email, setEmail] = useState('')
   const [envoi, setEnvoi] = useState(false)
   const [erreur, setErreur] = useState<string | null>(null)
@@ -18,15 +21,18 @@ export function MotDePasseOublie() {
       await demanderReinitialisation(email.trim())
       setEnvoye(true)
     } catch (err) {
-      setErreur(err instanceof Error ? err.message : 'Envoi impossible.')
+      setErreur(err instanceof Error ? err.message : t('forgotPassword.error'))
     } finally {
       setEnvoi(false)
     }
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-ardoise-50 px-4">
+    <div className="flex min-h-dvh items-center justify-center bg-ardoise-50 px-4 py-6">
       <div className="w-full max-w-sm space-y-5">
+        <div className="flex justify-end">
+          <LanguageSwitcher className="shadow-sm" />
+        </div>
         <div className="flex flex-col items-center gap-2">
           <span className="grid size-11 place-items-center rounded-xl bg-ardoise-900">
             <Container className="size-6 text-ambre-500" strokeWidth={2.5} />
@@ -35,12 +41,11 @@ export function MotDePasseOublie() {
         </div>
 
         <Carte className="p-5">
-          <h1 className="mb-4 text-base font-semibold text-ardoise-900">Mot de passe oublié</h1>
+          <h1 className="mb-4 text-base font-semibold text-ardoise-900">{t('forgotPassword.title')}</h1>
 
           {envoye ? (
             <Encart ton="succes">
-              Si un compte existe pour cette adresse, un lien de réinitialisation vient d’être
-              envoyé.
+              {t('forgotPassword.success')}
             </Encart>
           ) : (
             <>
@@ -52,7 +57,7 @@ export function MotDePasseOublie() {
               <form onSubmit={(e) => void soumettre(e)} className="space-y-3.5">
                 <div>
                   <Etiquette htmlFor="email" obligatoire>
-                    E-mail
+                    {t('signup.email')}
                   </Etiquette>
                   <Champ
                     id="email"
@@ -65,7 +70,7 @@ export function MotDePasseOublie() {
                 </div>
                 <Bouton type="submit" className="w-full" disabled={envoi}>
                   {envoi && <Loader2 className="size-4 animate-spin" />}
-                  Envoyer le lien
+                  {t('forgotPassword.submit')}
                 </Bouton>
               </form>
             </>
@@ -73,7 +78,7 @@ export function MotDePasseOublie() {
 
           <p className="mt-4 text-center text-sm text-ardoise-500">
             <Link to="/connexion" className="font-medium text-ardoise-900 hover:underline">
-              Retour à la connexion
+              {t('forgotPassword.backToLogin')}
             </Link>
           </p>
         </Carte>

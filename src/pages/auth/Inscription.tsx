@@ -7,15 +7,18 @@
 
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Container, Loader2 } from 'lucide-react'
 import { inscrireOrganisation, rejoindreInvitation } from '@/lib/auth'
 import { useSession } from '@/session'
 import { Bouton, Carte, Champ, Encart, Etiquette } from '@/components/ui'
+import { LanguageSwitcher } from '@/i18n/LanguageSwitcher'
 import { cn } from '@/lib/utils'
 
 type Parcours = 'organisation' | 'invitation'
 
 export function Inscription() {
+  const { t } = useTranslation('auth')
   const { rafraichirProfil } = useSession()
   const [parcours, setParcours] = useState<Parcours>('organisation')
   const [nomOrganisation, setNomOrganisation] = useState('')
@@ -47,7 +50,7 @@ export function Inscription() {
       // que l'application bascule immédiatement, sans rafraîchissement manuel.
       await rafraichirProfil()
     } catch (err) {
-      setErreur(err instanceof Error ? err.message : 'Inscription impossible.')
+      setErreur(err instanceof Error ? err.message : t('signup.error'))
     } finally {
       setEnvoi(false)
     }
@@ -58,10 +61,8 @@ export function Inscription() {
       <div className="flex min-h-dvh items-center justify-center bg-ardoise-50 px-4">
         <Carte className="w-full max-w-sm p-5 text-center">
           <Loader2 className="mx-auto size-6 animate-spin text-ardoise-400" />
-          <p className="mt-3 text-base font-semibold text-ardoise-900">Bienvenue sur AcidTrack !</p>
-          <p className="mt-2 text-sm text-ardoise-500">
-            Votre compte est prêt. L’application se charge automatiquement.
-          </p>
+          <p className="mt-3 text-base font-semibold text-ardoise-900">{t('signup.successTitle')}</p>
+          <p className="mt-2 text-sm text-ardoise-500">{t('signup.successMessage')}</p>
         </Carte>
       </div>
     )
@@ -70,6 +71,9 @@ export function Inscription() {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-ardoise-50 px-4 py-8">
       <div className="w-full max-w-sm space-y-5">
+        <div className="flex justify-end">
+          <LanguageSwitcher className="shadow-sm" />
+        </div>
         <div className="flex flex-col items-center gap-2">
           <span className="grid size-11 place-items-center rounded-xl bg-ardoise-900">
             <Container className="size-6 text-ambre-500" strokeWidth={2.5} />
@@ -89,7 +93,7 @@ export function Inscription() {
                   : 'text-ardoise-500',
               )}
             >
-              Nouvelle organisation
+              {t('signup.newOrganization')}
             </button>
             <button
               type="button"
@@ -101,7 +105,7 @@ export function Inscription() {
                   : 'text-ardoise-500',
               )}
             >
-              J’ai été invité(e)
+              {t('signup.invited')}
             </button>
           </div>
 
@@ -113,7 +117,7 @@ export function Inscription() {
 
           {parcours === 'invitation' && (
             <Encart ton="info" className="mb-4">
-              Utilisez la même adresse e-mail que celle communiquée par votre administrateur.
+              {t('signup.inviteHint')}
             </Encart>
           )}
 
@@ -121,7 +125,7 @@ export function Inscription() {
             {parcours === 'organisation' && (
               <div>
                 <Etiquette htmlFor="org" obligatoire>
-                  Nom de l’organisation
+                  {t('signup.orgName')}
                 </Etiquette>
                 <Champ
                   id="org"
@@ -135,7 +139,7 @@ export function Inscription() {
             {parcours === 'organisation' && (
               <div>
                 <Etiquette htmlFor="nom" obligatoire>
-                  Votre nom complet
+                  {t('signup.fullName')}
                 </Etiquette>
                 <Champ
                   id="nom"
@@ -147,7 +151,7 @@ export function Inscription() {
             )}
             <div>
               <Etiquette htmlFor="email" obligatoire>
-                E-mail
+                {t('signup.email')}
               </Etiquette>
               <Champ
                 id="email"
@@ -160,7 +164,7 @@ export function Inscription() {
             </div>
             <div>
               <Etiquette htmlFor="mdp" obligatoire>
-                Mot de passe
+                {t('signup.password')}
               </Etiquette>
               <Champ
                 id="mdp"
@@ -175,14 +179,14 @@ export function Inscription() {
 
             <Bouton type="submit" className="w-full" disabled={envoi}>
               {envoi && <Loader2 className="size-4 animate-spin" />}
-              {parcours === 'organisation' ? 'Créer mon organisation' : 'Rejoindre l’organisation'}
+              {parcours === 'organisation' ? t('signup.createOrganization') : t('signup.joinOrganization')}
             </Bouton>
           </form>
 
           <p className="mt-4 text-center text-sm text-ardoise-500">
-            Déjà un compte ?{' '}
+            {t('signup.alreadyHaveAccount')}{' '}
             <Link to="/connexion" className="font-medium text-ardoise-900 hover:underline">
-              Se connecter
+              {t('signup.connect')}
             </Link>
           </p>
         </Carte>
