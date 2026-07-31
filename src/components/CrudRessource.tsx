@@ -6,6 +6,7 @@
 
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Loader2, Pencil, Plus, Search, Trash2, TriangleAlert } from 'lucide-react'
 import { ErreurMetier } from '@/lib/actions'
 import { cn } from '@/lib/utils'
@@ -94,6 +95,7 @@ export function CrudRessource<T extends { id: string }>({
   /** Masque la création : ressource gérée uniquement en modification. */
   pasDeCreation?: boolean
 }) {
+  const { t } = useTranslation(['common', 'workflow'])
   const [recherche, setRecherche] = useState('')
   const [edition, setEdition] = useState<{ ouvert: boolean; element: T | null }>({
     ouvert: false,
@@ -122,7 +124,7 @@ export function CrudRessource<T extends { id: string }>({
     const schema = champs(edition.element)
     const manquants = schema
       .filter((c) => c.obligatoire && !String(valeurs[c.cle] ?? '').trim())
-      .map((c) => `${c.libelle} est obligatoire.`)
+      .map((c) => t('forms.required', { label: c.libelle }))
 
     const metier = valider?.(valeurs, edition.element) ?? []
     const toutes = [...manquants, ...metier]
@@ -187,7 +189,7 @@ export function CrudRessource<T extends { id: string }>({
           <Champ
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
-            placeholder="Rechercher…"
+            placeholder={t('forms.searchPlaceholder')}
             className="pl-9"
           />
         </div>
@@ -196,11 +198,11 @@ export function CrudRessource<T extends { id: string }>({
       {/* Liste */}
       {filtres.length === 0 ? (
         <EtatVide
-          titre={recherche ? 'Aucun résultat' : `Aucun élément`}
+          titre={recherche ? t('forms.emptyStateTitleFiltered') : t('forms.emptyStateTitle')}
           description={
             recherche
-              ? 'Affinez votre recherche.'
-              : 'Créez le premier enregistrement pour commencer.'
+              ? t('forms.emptyStateDescriptionFiltered')
+              : t('forms.emptyStateDescription')
           }
           action={
             !recherche && !pasDeCreation ? (
@@ -250,7 +252,7 @@ export function CrudRessource<T extends { id: string }>({
                         {actionsSupplementaires?.(element)}
                         <button
                           onClick={() => ouvrir(element)}
-                          aria-label={`Modifier ${libelleElement(element)}`}
+                          aria-label={t('resource.editAria', { name: libelleElement(element) })}
                           className="rounded-md p-1.5 text-ardoise-400 transition-colors hover:bg-ardoise-100 hover:text-ardoise-900"
                         >
                           <Pencil className="size-4" />
@@ -258,7 +260,7 @@ export function CrudRessource<T extends { id: string }>({
                         {onSupprimer && (
                           <button
                             onClick={() => setASupprimer(element)}
-                            aria-label={`Supprimer ${libelleElement(element)}`}
+                            aria-label={t('resource.deleteAria', { name: libelleElement(element) })}
                             className="rounded-md p-1.5 text-ardoise-400 transition-colors hover:bg-red-50 hover:text-red-600"
                           >
                             <Trash2 className="size-4" />
@@ -278,16 +280,20 @@ export function CrudRessource<T extends { id: string }>({
       <Modale
         ouverte={edition.ouvert}
         onFermer={fermer}
-        titre={edition.element ? `Modifier — ${libelleElement(edition.element)}` : libelleCreation}
+        titre={
+          edition.element
+            ? t('resource.editModalTitle', { name: libelleElement(edition.element) })
+            : libelleCreation
+        }
         sousTitre={titre}
         pied={
           <div className="flex gap-2">
             <Bouton variante="secondaire" className="flex-1" onClick={fermer} disabled={envoi}>
-              Annuler
+              {t('actions.cancel')}
             </Bouton>
             <Bouton className="flex-[2]" onClick={() => void enregistrer()} disabled={envoi}>
               {envoi && <Loader2 className="size-4 animate-spin" />}
-              Enregistrer
+              {t('actions.save')}
             </Bouton>
           </div>
         }
@@ -296,7 +302,7 @@ export function CrudRessource<T extends { id: string }>({
           {erreurs.length > 0 && (
             <Encart
               ton="erreur"
-              titre="Corrigez les points suivants"
+              titre={t('forms.errorsTitle')}
               icone={<TriangleAlert className="size-4" />}
             >
               <ul className="mt-1 list-inside list-disc space-y-0.5">
@@ -324,7 +330,7 @@ export function CrudRessource<T extends { id: string }>({
       <Modale
         ouverte={!!aSupprimer}
         onFermer={() => setASupprimer(null)}
-        titre="Confirmer la suppression"
+        titre={t('resource.deleteTitle')}
         pied={
           <div className="flex gap-2">
             <Bouton
@@ -333,7 +339,7 @@ export function CrudRessource<T extends { id: string }>({
               onClick={() => setASupprimer(null)}
               disabled={envoi}
             >
-              Annuler
+              {t('actions.cancel')}
             </Bouton>
             <Bouton
               variante="danger"
@@ -341,17 +347,15 @@ export function CrudRessource<T extends { id: string }>({
               onClick={() => void confirmerSuppression()}
               disabled={envoi}
             >
-              Supprimer
+              {t('actions.delete')}
             </Bouton>
           </div>
         }
       >
         <p className="text-sm text-ardoise-600">
-          Supprimer définitivement{' '}
-          <strong className="text-ardoise-900">
-            {aSupprimer ? libelleElement(aSupprimer) : ''}
-          </strong>{' '}
-          ? Cette action est irréversible.
+          {t('resource.deleteBody', {
+            name: aSupprimer ? libelleElement(aSupprimer) : '',
+          })}
         </p>
         {erreurs.length > 0 && (
           <Encart ton="erreur" className="mt-3">
@@ -376,6 +380,7 @@ function ChampDynamique({
   valeur: string | boolean | undefined
   onChange: (valeur: string | boolean) => void
 }) {
+  const { t } = useTranslation(['common', 'workflow'])
   const id = `form-${champ.cle}`
   const texte = typeof valeur === 'boolean' ? '' : (valeur ?? '')
 
@@ -411,7 +416,7 @@ function ChampDynamique({
           disabled={champ.lectureSeule}
           onChange={(e) => onChange(e.target.value)}
         >
-          <option value="">Sélectionner…</option>
+          <option value="">{t('forms.selectPlaceholder')}</option>
           {champ.options?.map((o) => (
             <option key={o.valeur} value={o.valeur}>
               {o.libelle}
