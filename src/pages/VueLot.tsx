@@ -3,6 +3,7 @@
  */
 
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import { ChevronLeft, Filter, Package } from 'lucide-react'
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
@@ -14,6 +15,7 @@ import { CarteCamion } from '@/components/CarteCamion'
 type Filtre = 'tous' | 'exceptions' | 'termines'
 
 export function VueLot({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
+  const { t } = useTranslation(['common', 'workflow'])
   const { id } = useParams<{ id: string }>()
   const [filtre, setFiltre] = useState<Filtre>('tous')
 
@@ -31,8 +33,8 @@ export function VueLot({ portefeuille }: { portefeuille: PortefeuilleComplet }) 
     return (
       <EtatVide
         icone={<Package className="size-10" />}
-        titre="Lot introuvable"
-        description="Ce lot n’existe pas ou ne fait pas partie de votre périmètre."
+        titre={t('lotDetail.notFound.title')}
+        description={t('lotDetail.notFound.description')}
       />
     )
   }
@@ -59,11 +61,11 @@ export function VueLot({ portefeuille }: { portefeuille: PortefeuilleComplet }) 
   ).length
 
   const filtres: { cle: Filtre; libelle: string; compte: number }[] = [
-    { cle: 'tous', libelle: 'Tous', compte: camions.length },
-    { cle: 'exceptions', libelle: 'Exceptions', compte: nbExceptions },
+    { cle: 'tous', libelle: t('lotDetail.filters.all'), compte: camions.length },
+    { cle: 'exceptions', libelle: t('lotDetail.filters.exceptions'), compte: nbExceptions },
     {
       cle: 'termines',
-      libelle: 'Terminés',
+      libelle: t('lotDetail.filters.completed'),
       compte: camions.filter((c) => c.statut === 'TERMINE').length,
     },
   ]
@@ -75,7 +77,7 @@ export function VueLot({ portefeuille }: { portefeuille: PortefeuilleComplet }) 
         className="inline-flex items-center gap-1 text-sm font-medium text-ardoise-500 transition-colors hover:text-ardoise-900"
       >
         <ChevronLeft className="size-4" />
-        Tour de contrôle
+        {t('navigation.controlTour')}
       </Link>
 
       {/* Résumé du lot */}
@@ -104,7 +106,7 @@ export function VueLot({ portefeuille }: { portefeuille: PortefeuilleComplet }) 
         <div className="mt-4 rounded-xl bg-ardoise-50 px-4 py-3">
           <div className="flex items-baseline justify-between gap-3">
             <span className="text-[11px] font-medium uppercase tracking-wide text-ardoise-500">
-              Livré
+              {t('lotDetail.summary.delivered')}
             </span>
             <span className="text-sm font-semibold tabular-nums text-ardoise-900">
               {formatTonnage(livre)} / {formatTonnage(planifie)} livré
@@ -114,17 +116,17 @@ export function VueLot({ portefeuille }: { portefeuille: PortefeuilleComplet }) 
         </div>
 
         <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-ardoise-100 pt-4 sm:grid-cols-4">
-          <Resume libelle="Camions" valeur={`${camions.length}`} detail={`sur ${lot.nb_camions_prevu} prévus`} />
+          <Resume libelle={t('lotDetail.summary.trucks')} valeur={`${camions.length}`} detail={t('lotDetail.summary.expected', { count: lot.nb_camions_prevu })} />
           <Resume
-            libelle="Tonnage"
+            libelle={t('lotDetail.summary.tonnage')}
             valeur={formatTonnage(tonnage(camions))}
-            detail={`planifié ${formatTonnage(lot.quantite_planifiee_t)}`}
+            detail={t('lotDetail.summary.planned', { value: formatTonnage(lot.quantite_planifiee_t) })}
           />
-          <Resume libelle="Destination" valeur={lot.destination} />
+          <Resume libelle={t('lotDetail.summary.destination')} valeur={lot.destination} />
           <Resume
-            libelle="Période"
+            libelle={t('lotDetail.summary.period')}
             valeur={formatDate(lot.periode_debut)}
-            detail={`au ${formatDate(lot.periode_fin)}`}
+            detail={t('lotDetail.summary.toDate', { date: formatDate(lot.periode_fin) })}
           />
         </dl>
       </Carte>
@@ -151,7 +153,7 @@ export function VueLot({ portefeuille }: { portefeuille: PortefeuilleComplet }) 
 
       {/* Camions */}
       {camionsFiltres.length === 0 ? (
-        <EtatVide titre="Aucun camion dans cette sélection" />
+        <EtatVide titre={t('lotDetail.empty')} />
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {camionsFiltres.map((camion) => (

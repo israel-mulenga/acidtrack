@@ -7,6 +7,7 @@
  */
 
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ExternalLink, Truck } from 'lucide-react'
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
 import { useUtilisateur } from '@/session'
@@ -36,12 +37,13 @@ const nombreOuNull = (v: unknown) => (texte(v) === '' ? null : Number(v))
 export function SectionCommandes({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
   const profil = useUtilisateur()
   const toast = useToast()
+  const { t } = useTranslation(['common', 'workflow'])
 
   return (
     <CrudRessource<Commande>
-      titre="Commandes"
-      description="Engagement commercial avec un client. La quantité commandée plafonne le total des lots."
-      libelleCreation="Nouvelle commande"
+      titre={t('adminCommercial.ordersTitle')}
+      description={t('adminCommercial.ordersDescription')}
+      libelleCreation={t('adminCommercial.createOrder')}
       elements={portefeuille.commandes}
       rechercheDans={(c) =>
         `${c.reference} ${c.destination} ${
@@ -52,24 +54,24 @@ export function SectionCommandes({ portefeuille }: { portefeuille: PortefeuilleC
       colonnes={[
         {
           cle: 'reference',
-          libelle: 'Référence',
+          libelle: t('adminCommercial.reference'),
           rendu: (c) => <span className="font-medium text-ardoise-900">{c.reference}</span>,
         },
         {
           cle: 'client',
-          libelle: 'Client',
+          libelle: t('adminCommercial.client'),
           rendu: (c) =>
             portefeuille.clients.find((x) => x.id === c.client_id)?.raison_sociale ?? '—',
         },
         {
           cle: 'quantite',
-          libelle: 'Commandé',
+          libelle: t('adminCommercial.commanded'),
           rendu: (c) => formatTonnage(c.quantite_commandee_t),
           masquerMobile: true,
         },
         {
           cle: 'planifie',
-          libelle: 'Planifié',
+          libelle: t('adminCommercial.planned'),
           rendu: (c) => {
             const planifie = tonnagePlanifie(c.id, portefeuille.lots)
             const complet = planifie >= Number(c.quantite_commandee_t) - 0.001
@@ -81,12 +83,12 @@ export function SectionCommandes({ portefeuille }: { portefeuille: PortefeuilleC
           },
           masquerMobile: true,
         },
-        { cle: 'destination', libelle: 'Destination', rendu: (c) => c.destination },
+        { cle: 'destination', libelle: t('adminCommercial.destination'), rendu: (c) => c.destination },
       ]}
       champs={() => [
         {
           cle: 'client_id',
-          libelle: 'Client',
+          libelle: t('adminCommercial.destination'),
           type: 'liste',
           obligatoire: true,
           options: portefeuille.clients
@@ -95,26 +97,26 @@ export function SectionCommandes({ portefeuille }: { portefeuille: PortefeuilleC
         },
         {
           cle: 'reference',
-          libelle: 'Référence',
+          libelle: t('adminCommercial.reference'),
           type: 'texte',
           obligatoire: true,
-          aide: 'Proposée automatiquement, modifiable.',
+          aide: t('adminCommercial.autoSuggested'),
         },
-        { cle: 'produit', libelle: 'Produit', type: 'texte', obligatoire: true },
-        { cle: 'concentration', libelle: 'Concentration', type: 'texte' },
+        { cle: 'produit', libelle: t('adminCommercial.product'), type: 'texte', obligatoire: true },
+        { cle: 'concentration', libelle: t('adminCommercial.concentration'), type: 'texte' },
         {
           cle: 'quantite_commandee_t',
-          libelle: 'Quantité commandée',
+          libelle: t('adminCommercial.quantityOrdered'),
           type: 'nombre',
           unite: 't',
           obligatoire: true,
         },
-        { cle: 'prix_unitaire_usd', libelle: 'Prix unitaire', type: 'nombre', unite: 'USD/t' },
-        { cle: 'origine', libelle: 'Origine', type: 'texte', obligatoire: true },
-        { cle: 'destination', libelle: 'Destination', type: 'texte', obligatoire: true },
+        { cle: 'prix_unitaire_usd', libelle: t('adminCommercial.unitPrice'), type: 'nombre', unite: 'USD/t' },
+        { cle: 'origine', libelle: t('adminCommercial.origin'), type: 'texte', obligatoire: true },
+        { cle: 'destination', libelle: t('adminCommercial.destination'), type: 'texte', obligatoire: true },
         {
           cle: 'conditions_paiement',
-          libelle: 'Conditions de paiement',
+          libelle: t('adminCommercial.paymentConditions'),
           type: 'texte',
           pleineLargeur: true,
         },
@@ -134,14 +136,15 @@ export function SectionCommandes({ portefeuille }: { portefeuille: PortefeuilleC
         const erreurs: string[] = []
         const quantite = Number(v.quantite_commandee_t)
         if (!Number.isFinite(quantite) || quantite <= 0) {
-          erreurs.push('La quantité commandée doit être supérieure à zéro.')
+          erreurs.push(t('adminCommercial.quantityRequired'))
         } else if (element) {
           // On ne peut pas réduire une commande sous le total déjà planifié
           const planifie = tonnagePlanifie(element.id, portefeuille.lots)
           if (quantite < planifie - 0.001) {
             erreurs.push(
-              `${planifie.toLocaleString('fr-FR')} t sont déjà planifiées en lots : ` +
-                'la quantité commandée ne peut pas être inférieure.',
+              t('adminCommercial.quantityTooLow', {
+                quantity: planifie.toLocaleString('fr-FR'),
+              }),
             )
           }
         }
@@ -162,12 +165,12 @@ export function SectionCommandes({ portefeuille }: { portefeuille: PortefeuilleC
         }
         if (element) await modifier('commandes', element.id, ligne)
         else await creer('commandes', ligne)
-        toast.succes(element ? 'Commande mise à jour.' : `Commande ${ligne.reference} créée.`)
+        toast.succes(element ? t('adminCommercial.orderUpdated') : t('adminCommercial.orderCreated', { reference: ligne.reference }))
         await portefeuille.recharger()
       }}
       onSupprimer={async (c) => {
         await supprimer('commandes', c.id)
-        toast.succes('Commande supprimée.')
+        toast.succes(t('adminCommercial.orderDeleted'))
         await portefeuille.recharger()
       }}
     />
@@ -187,32 +190,33 @@ export function SectionLots({
 }) {
   const profil = useUtilisateur()
   const toast = useToast()
+  const { t } = useTranslation(['common', 'workflow'])
 
   return (
     <CrudRessource<Lot>
-      titre="Lots"
-      description="Découpage opérationnel d’une commande. L’itinéraire choisi détermine les jalons proposés au terrain."
-      libelleCreation="Nouveau lot"
+      titre={t('adminCommercial.lotsTitle')}
+      description={t('adminCommercial.lotsDescription')}
+      libelleCreation={t('adminCommercial.createLot')}
       elements={portefeuille.lots}
       rechercheDans={(l) => `${l.reference} ${l.destination} ${l.corridor}`}
       libelleElement={(l) => l.reference}
       colonnes={[
         {
           cle: 'reference',
-          libelle: 'Référence',
+          libelle: t('adminCommercial.reference'),
           rendu: (l) => <span className="font-medium text-ardoise-900">{l.reference}</span>,
         },
         {
           cle: 'commande',
-          libelle: 'Commande',
+          libelle: t('adminCommercial.order'),
           rendu: (l) =>
             portefeuille.commandes.find((c) => c.id === l.commande_id)?.reference ?? '—',
           masquerMobile: true,
         },
-        { cle: 'destination', libelle: 'Destination', rendu: (l) => l.destination },
+        { cle: 'destination', libelle: t('adminCommercial.destination'), rendu: (l) => l.destination },
         {
           cle: 'tonnage',
-          libelle: 'Affecté / planifié',
+          libelle: t('adminCommercial.assignedPlanned'),
           rendu: (l) => {
             const affecte = tonnageAffecte(l.id, portefeuille.camions)
             return (
@@ -225,7 +229,7 @@ export function SectionLots({
         },
         {
           cle: 'camions',
-          libelle: 'Camions',
+          libelle: t('adminCommercial.trucks'),
           rendu: (l) => {
             const nombre = portefeuille.camions.filter((c) => c.lot_id === l.id).length
             return (
@@ -238,7 +242,7 @@ export function SectionLots({
         },
         {
           cle: 'periode',
-          libelle: 'Période',
+          libelle: t('adminCommercial.period'),
           rendu: (l) =>
             l.periode_debut ? (
               <span className="text-xs text-ardoise-500">
@@ -254,16 +258,16 @@ export function SectionLots({
         <>
           <button
             onClick={() => onAjouterCamions(lot)}
-            aria-label={`Ajouter des camions au lot ${lot.reference}`}
-            title="Ajouter des dossiers camions"
+            aria-label={t('adminCommercial.addTrucks')}
+            title={t('adminCommercial.addTrucks')}
             className="rounded-md p-1.5 text-ardoise-400 transition-colors hover:bg-ambre-50 hover:text-ambre-700"
           >
             <Truck className="size-4" />
           </button>
           <Link
             to={`/lots/${lot.id}`}
-            aria-label={`Ouvrir le lot ${lot.reference}`}
-            title="Ouvrir la vue lot"
+            aria-label={t('adminCommercial.openLot')}
+            title={t('adminCommercial.openLot')}
             className="rounded-md p-1.5 text-ardoise-400 transition-colors hover:bg-ardoise-100 hover:text-ardoise-900"
           >
             <ExternalLink className="size-4" />
@@ -273,7 +277,7 @@ export function SectionLots({
       champs={(lot) => [
         {
           cle: 'commande_id',
-          libelle: 'Commande',
+          libelle: t('adminCommercial.order'),
           type: 'liste',
           obligatoire: true,
           options: portefeuille.commandes.map((c) => {
@@ -286,10 +290,10 @@ export function SectionLots({
             }
           }),
         },
-        { cle: 'reference', libelle: 'Référence', type: 'texte', obligatoire: true },
+        { cle: 'reference', libelle: t('adminCommercial.reference'), type: 'texte', obligatoire: true },
         {
           cle: 'itineraire_id',
-          libelle: 'Itinéraire',
+          libelle: t('adminCommercial.route'),
           type: 'liste',
           options: portefeuille.itineraires
             .filter((i) => i.actif)
@@ -297,31 +301,31 @@ export function SectionLots({
               valeur: i.id,
               libelle: `${i.nom} (${i.jalons.length} jalons)`,
             })),
-          aide: 'Détermine les points de contrôle proposés lors des mises à jour terrain.',
+          aide: t('adminCommercial.routeHelp'),
           pleineLargeur: true,
         },
         {
           cle: 'corridor',
-          libelle: 'Corridor',
+          libelle: t('adminCommercial.corridor'),
           type: 'texte',
-          aide: 'Repris de l’itinéraire si laissé vide.',
+          aide: t('adminCommercial.routeOrCorridorHelp'),
         },
         {
           cle: 'destination',
-          libelle: 'Destination',
+          libelle: t('adminCommercial.destination'),
           type: 'texte',
-          aide: 'Reprise de l’itinéraire si laissée vide.',
+          aide: t('adminCommercial.routeOrCorridorHelp'),
         },
         {
           cle: 'quantite_planifiee_t',
-          libelle: 'Quantité planifiée',
+          libelle: t('adminCommercial.quantityPlanned'),
           type: 'nombre',
           unite: 't',
           obligatoire: true,
         },
-        { cle: 'nb_camions_prevu', libelle: 'Camions prévus', type: 'nombre' },
-        { cle: 'periode_debut', libelle: 'Début de période', type: 'date' },
-        { cle: 'periode_fin', libelle: 'Fin de période', type: 'date' },
+        { cle: 'nb_camions_prevu', libelle: t('adminCommercial.expectedTrucks'), type: 'nombre' },
+        { cle: 'periode_debut', libelle: t('adminCommercial.startPeriod'), type: 'date' },
+        { cle: 'periode_fin', libelle: t('adminCommercial.endPeriod'), type: 'date' },
       ]}
       valeursInitiales={(l) => {
         const commande =
@@ -350,12 +354,12 @@ export function SectionLots({
         // Corridor et destination viennent de l'itinéraire, sinon ils sont exigés
         if (!itineraire && (!texte(v.corridor) || !texte(v.destination))) {
           erreurs.push(
-            'Choisissez un itinéraire, ou renseignez manuellement le corridor et la destination.',
+            t('adminCommercial.selectRouteOrFillFields'),
           )
         }
 
         if (!Number.isFinite(quantite) || quantite <= 0) {
-          erreurs.push('La quantité planifiée doit être supérieure à zéro.')
+          erreurs.push(t('adminCommercial.plannedQuantityRequired'))
         } else if (commande) {
           const message = controleQuantiteLot(
             commande,
@@ -370,14 +374,15 @@ export function SectionLots({
           const affecte = tonnageAffecte(element.id, portefeuille.camions)
           if (Number.isFinite(quantite) && quantite < affecte - 0.001) {
             erreurs.push(
-              `${affecte.toLocaleString('fr-FR')} t sont déjà affectées à des camions : ` +
-                'la quantité planifiée ne peut pas être inférieure.',
+              t('adminCommercial.quantityAlreadyAssigned', {
+                quantity: affecte.toLocaleString('fr-FR'),
+              }),
             )
           }
         }
 
         if (v.periode_debut && v.periode_fin && v.periode_fin < v.periode_debut) {
-          erreurs.push('La fin de période doit suivre son début.')
+          erreurs.push(t('adminCommercial.periodEndAfterStart'))
         }
         return erreurs
       }}
@@ -404,12 +409,12 @@ export function SectionLots({
         }
         if (element) await modifier('lots', element.id, ligne)
         else await creer('lots', ligne)
-        toast.succes(element ? 'Lot mis à jour.' : `Lot ${ligne.reference} créé.`)
+        toast.succes(element ? t('adminCommercial.lotUpdated') : t('adminCommercial.lotCreated', { reference: ligne.reference }))
         await portefeuille.recharger()
       }}
       onSupprimer={async (l) => {
         await supprimer('lots', l.id)
-        toast.succes('Lot supprimé.')
+        toast.succes(t('adminCommercial.lotDeleted'))
         await portefeuille.recharger()
       }}
     />

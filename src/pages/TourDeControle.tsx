@@ -16,11 +16,13 @@ import {
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
 import { progressionLot, tonnage, tonnageLivre } from '@/lib/workflow'
 import { depuis, formatTonnage } from '@/lib/utils'
+import { useTranslation } from 'react-i18next'
 import { Carte, EtatVide, Progression, Squelette, Statistique } from '@/components/ui'
 import { CarteCamion } from '@/components/CarteCamion'
 import { IndicateurTempsReel } from '@/components/Coquille'
 
 export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
+  const { t } = useTranslation(['common', 'workflow'])
   const { camions, lots, referentiel, incidentsOuverts, evenementsAValider } = portefeuille
 
   if (portefeuille.chargement) {
@@ -59,10 +61,10 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight text-ardoise-900">
-            Tour de contrôle
+            {t('navigation.controlTour')}
           </h1>
           <p className="text-sm text-ardoise-500">
-            {actifs.length} camions actifs · {lots.length} lots en cours
+            {t('dashboard.summary', { count: actifs.length, defaultValue: '{{count}} camion actif · {{lots}} lot en cours' })}
           </p>
         </div>
         <IndicateurTempsReel />
@@ -71,24 +73,24 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
       {/* Indicateurs */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Statistique
-          libelle="Tonnage en transit"
+          libelle={t('dashboard.kpi.inTransitTonnage')}
           valeur={formatTonnage(tonnage(enTransit))}
           icone={<Truck className="size-4" />}
         />
         <Statistique
-          libelle="Tonnage livré"
+          libelle={t('dashboard.kpi.deliveredTonnage')}
           valeur={formatTonnage(tonnage(livres))}
           ton="succes"
           icone={<Package className="size-4" />}
         />
         <Statistique
-          libelle="Camions en retard"
+          libelle={t('dashboard.kpi.delayedTrucks')}
           valeur={enRetard.length}
           ton={enRetard.length > 0 ? 'alerte' : 'neutre'}
           icone={<Clock className="size-4" />}
         />
         <Statistique
-          libelle="Camions bloqués"
+          libelle={t('dashboard.kpi.blockedTrucks')}
           valeur={bloques.length}
           ton={bloques.length > 0 ? 'danger' : 'neutre'}
           icone={<ShieldAlert className="size-4" />}
@@ -101,7 +103,7 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
           <div className="flex items-center gap-2">
             <ClipboardCheck className="size-4 shrink-0 text-violet-600" />
             <h2 className="font-semibold tracking-tight text-ardoise-900">
-              En attente de validation
+              {t('dashboard.validationQueue.title')}
             </h2>
             <span className="rounded-full bg-violet-600 px-2 py-0.5 text-xs font-bold text-white">
               {evenementsAValider.length}
@@ -141,7 +143,7 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
         <section>
           <h2 className="mb-2.5 flex items-center gap-2 font-semibold tracking-tight text-ardoise-900">
             <AlertTriangle className="size-4 text-red-500" />
-            Exceptions à traiter
+            {t('dashboard.exceptions.title')}
             <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">
               {exceptions.length}
             </span>
@@ -165,7 +167,7 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
       {/* Répartition par étape */}
       <Carte className="p-4">
         <h2 className="mb-3 font-semibold tracking-tight text-ardoise-900">
-          Répartition par macro-étape
+          {t('dashboard.repartition.title')}
         </h2>
         <div className="space-y-2">
           {repartition.map(({ etape, nombre }) => (
@@ -192,7 +194,7 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
 
       {/* Lots */}
       <section>
-        <h2 className="mb-2.5 font-semibold tracking-tight text-ardoise-900">Lots en cours</h2>
+        <h2 className="mb-2.5 font-semibold tracking-tight text-ardoise-900">{t('dashboard.lots.title')}</h2>
         <div className="grid gap-3 md:grid-cols-2">
           {lots.map((lot) => {
             const camionsLot = camions.filter((c) => c.lot_id === lot.id)
@@ -217,20 +219,20 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
 
                   <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ardoise-500">
                     <span>
-                      {camionsLot.length} camion{camionsLot.length > 1 ? 's' : ''}
+                      {t('dashboard.lots.truckCount', { count: camionsLot.length })}
                     </span>
                     <span>· {formatTonnage(tonnage(camionsLot))}</span>
                     <span className="font-medium text-emerald-600">
                       · {formatTonnage(livre)} / {formatTonnage(lot.quantite_planifiee_t)} livré
                     </span>
                     {camionsLot.some((c) => c.statut === 'BLOQUE') && (
-                      <span className="font-medium text-red-600">· blocage en cours</span>
+                      <span className="font-medium text-red-600">· {t('dashboard.lots.blocked')}</span>
                     )}
                   </div>
 
                   {/* Progression pondérée par le tonnage (§5) */}
                   <p className="mt-2 text-[11px] italic text-ardoise-400">
-                    Progression pondérée par le tonnage
+                    {t('dashboard.lots.weightedProgress')}
                   </p>
                 </Carte>
               </Link>
@@ -243,7 +245,7 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
       {incidentsOuverts.length > 0 && (
         <section>
           <h2 className="mb-2.5 font-semibold tracking-tight text-ardoise-900">
-            Incidents ouverts
+            {t('dashboard.incidents.title')}
           </h2>
           <Carte className="divide-y divide-ardoise-100">
             {incidentsOuverts.map((incident) => {
@@ -282,8 +284,8 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
       {actifs.length === 0 && (
         <EtatVide
           icone={<Truck className="size-10" />}
-          titre="Aucun camion suivi"
-          description="Créez une commande, un lot et ses dossiers camions depuis l’onglet Administration."
+          titre={t('dashboard.empty.title')}
+          description={t('dashboard.empty.description')}
         />
       )}
     </div>

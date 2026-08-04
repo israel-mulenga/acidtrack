@@ -7,6 +7,7 @@
  * charges : « la progression du lot est dérivée des camions »).
  */
 
+import { t } from 'i18next'
 import type {
   Camion,
   Document,
@@ -25,14 +26,14 @@ export const NB_ETAPES = 7
 
 /** Affichage interne (équipes opérations / terrain / finance). */
 export const LIBELLE_STATUT_ETAPE: Record<StatutEtape, string> = {
-  PLANIFIE: 'Planifié',
-  EN_ATTENTE_ACTION: 'En attente d’action',
-  EN_COURS: 'En cours',
-  EN_ATTENTE_VALIDATION: 'En attente de validation',
-  TERMINE: 'Terminé',
-  BLOQUE: 'Bloqué',
-  EN_RETARD: 'En retard',
-  ANNULE: 'Annulé',
+  PLANIFIE: t('workflow:statuts.etape.PLANIFIE', { defaultValue: 'Planifié' }),
+  EN_ATTENTE_ACTION: t('workflow:statuts.etape.EN_ATTENTE_ACTION', { defaultValue: 'En attente d’action' }),
+  EN_COURS: t('workflow:statuts.etape.EN_COURS', { defaultValue: 'En cours' }),
+  EN_ATTENTE_VALIDATION: t('workflow:statuts.etape.EN_ATTENTE_VALIDATION', { defaultValue: 'En attente de validation' }),
+  TERMINE: t('workflow:statuts.etape.TERMINE', { defaultValue: 'Terminé' }),
+  BLOQUE: t('workflow:statuts.etape.BLOQUE', { defaultValue: 'Bloqué' }),
+  EN_RETARD: t('workflow:statuts.etape.EN_RETARD', { defaultValue: 'En retard' }),
+  ANNULE: t('workflow:statuts.etape.ANNULE', { defaultValue: 'Annulé' }),
 }
 
 /**
@@ -40,48 +41,48 @@ export const LIBELLE_STATUT_ETAPE: Record<StatutEtape, string> = {
  * quel au client, qui voit une formulation neutre et rassurante.
  */
 export const LIBELLE_STATUT_CLIENT: Record<StatutEtape, string> = {
-  PLANIFIE: 'À venir',
-  EN_ATTENTE_ACTION: 'À traiter',
-  EN_COURS: 'En cours',
-  EN_ATTENTE_VALIDATION: 'En vérification',
-  TERMINE: 'Terminé',
-  BLOQUE: 'Attention requise',
-  EN_RETARD: 'En retard',
-  ANNULE: 'Annulé',
+  PLANIFIE: t('workflow:statuts.client.PLANIFIE', { defaultValue: 'À venir' }),
+  EN_ATTENTE_ACTION: t('workflow:statuts.client.EN_ATTENTE_ACTION', { defaultValue: 'À traiter' }),
+  EN_COURS: t('workflow:statuts.client.EN_COURS', { defaultValue: 'En cours' }),
+  EN_ATTENTE_VALIDATION: t('workflow:statuts.client.EN_ATTENTE_VALIDATION', { defaultValue: 'En vérification' }),
+  TERMINE: t('workflow:statuts.client.TERMINE', { defaultValue: 'Terminé' }),
+  BLOQUE: t('workflow:statuts.client.BLOQUE', { defaultValue: 'Attention requise' }),
+  EN_RETARD: t('workflow:statuts.client.EN_RETARD', { defaultValue: 'En retard' }),
+  ANNULE: t('workflow:statuts.client.ANNULE', { defaultValue: 'Annulé' }),
 }
 
 export const LIBELLE_STATUT_CAMION: Record<StatutCamion, string> = {
-  EN_COURS: 'En cours',
-  TERMINE: 'Terminé',
-  BLOQUE: 'Bloqué',
-  ANNULE: 'Annulé',
+  EN_COURS: t('workflow:statuts.camion.EN_COURS', { defaultValue: 'En cours' }),
+  TERMINE: t('workflow:statuts.camion.TERMINE', { defaultValue: 'Terminé' }),
+  BLOQUE: t('workflow:statuts.camion.BLOQUE', { defaultValue: 'Bloqué' }),
+  ANNULE: t('workflow:statuts.camion.ANNULE', { defaultValue: 'Annulé' }),
 }
 
 /** Intitulé affiché pour chaque rôle (en-tête, sélecteur de compte). */
 export const INTITULES_ROLE: Record<RoleUtilisateur, string> = {
-  ADMIN: 'Administrateur',
-  OPS: 'Responsable opérations',
-  TERRAIN: 'Agent terrain',
-  FINANCE: 'Finance',
-  CLIENT: 'Client',
+  ADMIN: t('workflow:roles.ADMIN', { defaultValue: 'Administrateur' }),
+  OPS: t('workflow:roles.OPS', { defaultValue: 'Responsable opérations' }),
+  TERRAIN: t('workflow:roles.TERRAIN', { defaultValue: 'Agent terrain' }),
+  FINANCE: t('workflow:roles.FINANCE', { defaultValue: 'Finance' }),
+  CLIENT: t('workflow:roles.CLIENT', { defaultValue: 'Client' }),
 }
 
 export const LIBELLE_DOCUMENT: Record<string, string> = {
-  BL: 'Bon de livraison',
-  TICKET_PESEE: 'Ticket de pesée',
-  COA: 'Certificat d’analyse (CoA)',
-  AVIS_BANCAIRE: 'Avis bancaire',
-  DECLARATION_EXPORT: 'Déclaration export',
-  CMR: 'CMR / Lettre de voiture',
-  DECLARATION_IMPORT: 'Déclaration import',
-  QUITTANCE: 'Quittance douanière',
-  RECU_PEAGE: 'Reçu de péage',
-  POD: 'Preuve de livraison (POD)',
-  TICKET_PESEE_MINE: 'Ticket de pesée mine',
-  FACTURE_FINALE: 'Facture finale',
-  PREUVE_SOLDE: 'Preuve de règlement du solde',
-  PHOTO: 'Photo',
-  AUTRE: 'Autre document',
+  BL: t('workflow:documents.BL', { defaultValue: 'Bon de livraison' }),
+  TICKET_PESEE: t('workflow:documents.TICKET_PESEE', { defaultValue: 'Ticket de pesée' }),
+  COA: t('workflow:documents.COA', { defaultValue: 'Certificat d’analyse (CoA)' }),
+  AVIS_BANCAIRE: t('workflow:documents.AVIS_BANCAIRE', { defaultValue: 'Avis bancaire' }),
+  DECLARATION_EXPORT: t('workflow:documents.DECLARATION_EXPORT', { defaultValue: 'Déclaration export' }),
+  CMR: t('workflow:documents.CMR', { defaultValue: 'CMR / Lettre de voiture' }),
+  DECLARATION_IMPORT: t('workflow:documents.DECLARATION_IMPORT', { defaultValue: 'Déclaration import' }),
+  QUITTANCE: t('workflow:documents.QUITTANCE', { defaultValue: 'Quittance douanière' }),
+  RECU_PEAGE: t('workflow:documents.RECU_PEAGE', { defaultValue: 'Reçu de péage' }),
+  POD: t('workflow:documents.POD', { defaultValue: 'Preuve de livraison (POD)' }),
+  TICKET_PESEE_MINE: t('workflow:documents.TICKET_PESEE_MINE', { defaultValue: 'Ticket de pesée mine' }),
+  FACTURE_FINALE: t('workflow:documents.FACTURE_FINALE', { defaultValue: 'Facture finale' }),
+  PREUVE_SOLDE: t('workflow:documents.PREUVE_SOLDE', { defaultValue: 'Preuve de règlement du solde' }),
+  PHOTO: t('workflow:documents.PHOTO', { defaultValue: 'Photo' }),
+  AUTRE: t('workflow:documents.AUTRE', { defaultValue: 'Autre document' }),
 }
 
 export function libelleDocument(type: string): string {

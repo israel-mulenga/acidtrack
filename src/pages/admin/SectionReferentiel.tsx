@@ -4,6 +4,7 @@
  * création, d'édition et de suppression vient de `CrudRessource`.
  */
 
+import { useTranslation } from 'react-i18next'
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
 import { useSession, useUtilisateur } from '@/session'
 import { creer, modifier, supprimer } from '@/lib/crud'
@@ -38,45 +39,46 @@ const nombreOuNull = (v: unknown) => (texte(v) === '' ? null : Number(v))
 export function SectionClients({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
   const profil = useUtilisateur()
   const toast = useToast()
+  const { t } = useTranslation(['common', 'workflow'])
 
   return (
     <CrudRessource<Client>
-      titre="Clients"
-      description="Mines et sociétés destinataires des livraisons."
-      libelleCreation="Nouveau client"
+      titre={t('adminReferentiel.clientsTitle')}
+      description={t('adminReferentiel.clientsDescription')}
+      libelleCreation={t('adminReferentiel.createClient')}
       elements={portefeuille.clients}
       rechercheDans={(c) => `${c.raison_sociale} ${c.mine ?? ''} ${c.ville ?? ''}`}
       libelleElement={(c) => c.raison_sociale}
       colonnes={[
-        { cle: 'nom', libelle: 'Raison sociale', rendu: (c) => (
+        { cle: 'nom', libelle: t('adminReferentiel.name'), rendu: (c) => (
           <span className="font-medium text-ardoise-900">{c.raison_sociale}</span>
         ) },
-        { cle: 'mine', libelle: 'Mine', rendu: (c) => c.mine ?? '—', masquerMobile: true },
-        { cle: 'ville', libelle: 'Ville', rendu: (c) => c.ville ?? '—', masquerMobile: true },
+        { cle: 'mine', libelle: t('adminReferentiel.mine'), rendu: (c) => c.mine ?? '—', masquerMobile: true },
+        { cle: 'ville', libelle: t('adminReferentiel.city'), rendu: (c) => c.ville ?? '—', masquerMobile: true },
         {
           cle: 'contact',
-          libelle: 'Contact',
+          libelle: t('adminReferentiel.contact'),
           rendu: (c) => c.contact_nom ?? '—',
           masquerMobile: true,
         },
         {
           cle: 'actif',
-          libelle: 'État',
+          libelle: t('adminReferentiel.state'),
           rendu: (c) =>
             c.actif ? (
-              <span className="text-emerald-600">Actif</span>
+              <span className="text-emerald-600">{t('adminReferentiel.active')}</span>
             ) : (
-              <span className="text-ardoise-400">Inactif</span>
+              <span className="text-ardoise-400">{t('adminReferentiel.inactive')}</span>
             ),
         },
       ]}
       champs={() => [
-        { cle: 'raison_sociale', libelle: 'Raison sociale', type: 'texte', obligatoire: true },
-        { cle: 'mine', libelle: 'Mine', type: 'texte' },
-        { cle: 'ville', libelle: 'Ville', type: 'texte' },
-        { cle: 'contact_nom', libelle: 'Contact', type: 'texte' },
-        { cle: 'contact_tel', libelle: 'Téléphone', type: 'tel' },
-        { cle: 'actif', libelle: 'Client actif', type: 'booleen' },
+        { cle: 'raison_sociale', libelle: t('adminReferentiel.companyName'), type: 'texte', obligatoire: true },
+        { cle: 'mine', libelle: t('adminReferentiel.mine'), type: 'texte' },
+        { cle: 'ville', libelle: t('adminReferentiel.city'), type: 'texte' },
+        { cle: 'contact_nom', libelle: t('adminReferentiel.contact'), type: 'texte' },
+        { cle: 'contact_tel', libelle: t('adminReferentiel.phone'), type: 'tel' },
+        { cle: 'actif', libelle: t('adminReferentiel.clientActive'), type: 'booleen' },
       ]}
       valeursInitiales={(c) => ({
         raison_sociale: c?.raison_sociale ?? '',
@@ -98,12 +100,12 @@ export function SectionClients({ portefeuille }: { portefeuille: PortefeuilleCom
         }
         if (element) await modifier('clients', element.id, ligne)
         else await creer('clients', ligne)
-        toast.succes(element ? 'Client mis à jour.' : 'Client créé.')
+        toast.succes(element ? t('adminReferentiel.clientUpdated') : t('adminReferentiel.clientCreated'))
         await portefeuille.recharger()
       }}
       onSupprimer={async (c) => {
         await supprimer('clients', c.id)
-        toast.succes('Client supprimé.')
+        toast.succes(t('adminReferentiel.clientDeleted'))
         await portefeuille.recharger()
       }}
     />
@@ -121,35 +123,36 @@ export function SectionPointsChargement({
 }) {
   const profil = useUtilisateur()
   const toast = useToast()
+  const { t } = useTranslation(['common', 'workflow'])
 
   return (
     <CrudRessource<PointChargement>
-      titre="Points de chargement"
-      description="Usines et terminaux où les camions sont chargés."
-      libelleCreation="Nouveau point"
+      titre={t('adminReferentiel.pointsTitle')}
+      description={t('adminReferentiel.pointsDescription')}
+      libelleCreation={t('adminReferentiel.createPoint')}
       elements={portefeuille.pointsChargement}
       rechercheDans={(p) => `${p.nom} ${p.ville ?? ''} ${p.pays}`}
       libelleElement={(p) => p.nom}
       colonnes={[
-        { cle: 'nom', libelle: 'Nom', rendu: (p) => (
+        { cle: 'nom', libelle: t('adminReferentiel.name'), rendu: (p) => (
           <span className="font-medium text-ardoise-900">{p.nom}</span>
         ) },
-        { cle: 'ville', libelle: 'Ville', rendu: (p) => p.ville ?? '—' },
-        { cle: 'pays', libelle: 'Pays', rendu: (p) => p.pays, masquerMobile: true },
+        { cle: 'ville', libelle: t('adminReferentiel.city'), rendu: (p) => p.ville ?? '—' },
+        { cle: 'pays', libelle: t('adminReferentiel.country'), rendu: (p) => p.pays, masquerMobile: true },
         {
           cle: 'contact',
-          libelle: 'Contact',
+          libelle: t('adminReferentiel.contact'),
           rendu: (p) => p.contact_nom ?? '—',
           masquerMobile: true,
         },
       ]}
       champs={() => [
-        { cle: 'nom', libelle: 'Nom du point', type: 'texte', obligatoire: true },
-        { cle: 'ville', libelle: 'Ville', type: 'texte' },
-        { cle: 'pays', libelle: 'Pays', type: 'texte', obligatoire: true },
-        { cle: 'contact_nom', libelle: 'Contact', type: 'texte' },
-        { cle: 'contact_tel', libelle: 'Téléphone', type: 'tel' },
-        { cle: 'actif', libelle: 'Point actif', type: 'booleen' },
+        { cle: 'nom', libelle: t('adminReferentiel.pointName'), type: 'texte', obligatoire: true },
+        { cle: 'ville', libelle: t('adminReferentiel.city'), type: 'texte' },
+        { cle: 'pays', libelle: t('adminReferentiel.country'), type: 'texte', obligatoire: true },
+        { cle: 'contact_nom', libelle: t('adminReferentiel.contact'), type: 'texte' },
+        { cle: 'contact_tel', libelle: t('adminReferentiel.phone'), type: 'tel' },
+        { cle: 'actif', libelle: t('adminReferentiel.active'), type: 'booleen' },
       ]}
       valeursInitiales={(p) => ({
         nom: p?.nom ?? '',
@@ -171,12 +174,12 @@ export function SectionPointsChargement({
         }
         if (element) await modifier('points_chargement', element.id, ligne)
         else await creer('points_chargement', ligne)
-        toast.succes(element ? 'Point mis à jour.' : 'Point de chargement créé.')
+        toast.succes(element ? t('adminReferentiel.pointUpdated') : t('adminReferentiel.pointCreated'))
         await portefeuille.recharger()
       }}
       onSupprimer={async (p) => {
         await supprimer('points_chargement', p.id)
-        toast.succes('Point supprimé.')
+        toast.succes(t('adminReferentiel.pointDeleted'))
         await portefeuille.recharger()
       }}
     />
@@ -190,23 +193,24 @@ export function SectionPointsChargement({
 export function SectionItineraires({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
   const profil = useUtilisateur()
   const toast = useToast()
+  const { t } = useTranslation(['common', 'workflow'])
 
   return (
     <CrudRessource<Itineraire>
-      titre="Itinéraires"
-      description="Les jalons saisis ici pilotent les points de contrôle proposés sur le terrain : un itinéraire Lubumbashi ne propose pas les jalons Kolwezi."
-      libelleCreation="Nouvel itinéraire"
+      titre={t('adminReferentiel.itinerariesTitle')}
+      description={t('adminReferentiel.itinerariesDescription')}
+      libelleCreation={t('adminReferentiel.createItinerary')}
       elements={portefeuille.itineraires}
       rechercheDans={(i) => `${i.nom} ${i.destination} ${i.corridor}`}
       libelleElement={(i) => i.nom}
       colonnes={[
-        { cle: 'nom', libelle: 'Itinéraire', rendu: (i) => (
+        { cle: 'nom', libelle: t('adminReferentiel.itinerary'), rendu: (i) => (
           <span className="font-medium text-ardoise-900">{i.nom}</span>
         ) },
-        { cle: 'destination', libelle: 'Destination', rendu: (i) => i.destination },
+        { cle: 'destination', libelle: t('adminReferentiel.destination'), rendu: (i) => i.destination },
         {
           cle: 'jalons',
-          libelle: 'Jalons',
+          libelle: t('adminReferentiel.jalons'),
           rendu: (i) => (
             <span className="text-xs text-ardoise-500">{i.jalons.join(' → ') || '—'}</span>
           ),
@@ -214,20 +218,20 @@ export function SectionItineraires({ portefeuille }: { portefeuille: Portefeuill
         },
         {
           cle: 'modele',
-          libelle: 'Modèle d’étapes',
+          libelle: t('adminReferentiel.stepModel'),
           rendu: (i) =>
             portefeuille.modeles.find((m) => m.id === i.modele_etapes_id)?.nom ?? '—',
           masquerMobile: true,
         },
       ]}
       champs={() => [
-        { cle: 'nom', libelle: 'Nom de l’itinéraire', type: 'texte', obligatoire: true },
-        { cle: 'origine', libelle: 'Origine', type: 'texte', obligatoire: true },
-        { cle: 'destination', libelle: 'Destination', type: 'texte', obligatoire: true },
-        { cle: 'corridor', libelle: 'Corridor', type: 'texte', obligatoire: true },
+        { cle: 'nom', libelle: t('adminReferentiel.itineraryName'), type: 'texte', obligatoire: true },
+        { cle: 'origine', libelle: t('adminReferentiel.origin'), type: 'texte', obligatoire: true },
+        { cle: 'destination', libelle: t('adminReferentiel.destination'), type: 'texte', obligatoire: true },
+        { cle: 'corridor', libelle: t('adminReferentiel.corridor'), type: 'texte', obligatoire: true },
         {
           cle: 'point_chargement_id',
-          libelle: 'Point de chargement',
+          libelle: t('adminReferentiel.loadingPoint'),
           type: 'liste',
           options: portefeuille.pointsChargement.map((p) => ({
             valeur: p.id,
@@ -236,7 +240,7 @@ export function SectionItineraires({ portefeuille }: { portefeuille: Portefeuill
         },
         {
           cle: 'modele_etapes_id',
-          libelle: 'Modèle d’étapes',
+          libelle: t('adminReferentiel.stepModel'),
           type: 'liste',
           options: portefeuille.modeles.map((m) => ({ valeur: m.id, libelle: m.nom })),
         },
@@ -245,11 +249,11 @@ export function SectionItineraires({ portefeuille }: { portefeuille: Portefeuill
           libelle: 'Jalons',
           type: 'texte',
           pleineLargeur: true,
-          aide: 'Points de contrôle séparés par des virgules, dans l’ordre du trajet. Ex. : Kasumbalesa, Péage Lubumbashi, Likasi',
+          aide: t('adminReferentiel.routeJalonsHelp'),
         },
-        { cle: 'distance_km', libelle: 'Distance', type: 'nombre', unite: 'km' },
-        { cle: 'duree_estimee_h', libelle: 'Durée estimée', type: 'nombre', unite: 'h' },
-        { cle: 'actif', libelle: 'Itinéraire actif', type: 'booleen' },
+        { cle: 'distance_km', libelle: t('adminReferentiel.distance'), type: 'nombre', unite: 'km' },
+        { cle: 'duree_estimee_h', libelle: t('adminReferentiel.duration'), type: 'nombre', unite: 'h' },
+        { cle: 'actif', libelle: t('adminReferentiel.itineraryActive'), type: 'booleen' },
       ]}
       valeursInitiales={(i) => ({
         nom: i?.nom ?? '',
@@ -280,12 +284,12 @@ export function SectionItineraires({ portefeuille }: { portefeuille: Portefeuill
         }
         if (element) await modifier('itineraires', element.id, ligne)
         else await creer('itineraires', ligne)
-        toast.succes(element ? 'Itinéraire mis à jour.' : 'Itinéraire créé.')
+        toast.succes(element ? t('adminReferentiel.itineraryUpdated') : t('adminReferentiel.itineraryCreated'))
         await portefeuille.recharger()
       }}
       onSupprimer={async (i) => {
         await supprimer('itineraires', i.id)
-        toast.succes('Itinéraire supprimé.')
+        toast.succes(t('adminReferentiel.itineraryDeleted'))
         await portefeuille.recharger()
       }}
     />
@@ -297,11 +301,11 @@ export function SectionItineraires({ portefeuille }: { portefeuille: Portefeuill
 /* ------------------------------------------------------------------ */
 
 const ROLES = [
-  { valeur: 'ADMIN', libelle: 'Administrateur' },
-  { valeur: 'OPS', libelle: 'Opérations' },
-  { valeur: 'TERRAIN', libelle: 'Agent terrain' },
-  { valeur: 'FINANCE', libelle: 'Finance' },
-  { valeur: 'CLIENT', libelle: 'Client' },
+  { valeur: 'ADMIN' },
+  { valeur: 'OPS' },
+  { valeur: 'TERRAIN' },
+  { valeur: 'FINANCE' },
+  { valeur: 'CLIENT' },
 ]
 
 const STATUTS_COMPTE = [
@@ -317,35 +321,39 @@ const LIBELLE_STATUT_COMPTE: Record<string, string> = {
 
 export function SectionUtilisateurs({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
   const toast = useToast()
+  const { t } = useTranslation(['common', 'workflow'])
 
   return (
     <CrudRessource<Utilisateur>
-      titre="Utilisateurs"
-      description="Comptes et rôles. Le rôle détermine les actions autorisées : seul un profil habilité valide une étape."
-      libelleCreation="Nouvel utilisateur"
+      titre={t('adminReferentiel.usersTitle')}
+      description={t('adminReferentiel.usersDescription')}
+      libelleCreation={t('adminReferentiel.createUser')}
       elements={portefeuille.utilisateurs}
       rechercheDans={(u) => `${u.nom} ${u.email ?? ''} ${u.role}`}
       libelleElement={(u) => u.nom}
       colonnes={[
-        { cle: 'nom', libelle: 'Nom', rendu: (u) => (
+        { cle: 'nom', libelle: t('adminReferentiel.name'), rendu: (u) => (
           <span className="font-medium text-ardoise-900">{u.nom}</span>
         ) },
         {
           cle: 'role',
-          libelle: 'Rôle',
-          rendu: (u) => ROLES.find((r) => r.valeur === u.role)?.libelle ?? u.role,
+          libelle: t('adminReferentiel.role'),
+          rendu: (u) => {
+            const role = ROLES.find((r) => r.valeur === u.role)
+            return role ? t(`workflow:roles.${role.valeur}`) : u.role
+          },
         },
-        { cle: 'email', libelle: 'E-mail', rendu: (u) => u.email ?? '—', masquerMobile: true },
+        { cle: 'email', libelle: t('adminReferentiel.email'), rendu: (u) => u.email ?? '—', masquerMobile: true },
         {
           cle: 'client',
-          libelle: 'Client rattaché',
+          libelle: t('adminReferentiel.client'),
           rendu: (u) =>
             portefeuille.clients.find((c) => c.id === u.client_id)?.raison_sociale ?? '—',
           masquerMobile: true,
         },
         {
           cle: 'statut',
-          libelle: 'Statut',
+          libelle: t('adminReferentiel.accountStatus'),
           rendu: (u) => (
             <span
               className={
@@ -363,36 +371,36 @@ export function SectionUtilisateurs({ portefeuille }: { portefeuille: Portefeuil
         },
       ]}
       champs={(element) => [
-        { cle: 'nom', libelle: 'Nom complet', type: 'texte', obligatoire: true },
-        { cle: 'role', libelle: 'Rôle', type: 'liste', obligatoire: true, options: ROLES },
+        { cle: 'nom', libelle: t('adminReferentiel.fullName'), type: 'texte', obligatoire: true },
+        { cle: 'role', libelle: t('adminReferentiel.role'), type: 'liste', obligatoire: true, options: ROLES.map((r) => ({ ...r, libelle: t(`workflow:roles.${r.valeur}`) })) },
         {
           cle: 'email',
-          libelle: 'E-mail',
+          libelle: t('adminReferentiel.email'),
           type: 'texte',
           obligatoire: !element,
           lectureSeule: !!element,
-          aide: !element ? 'Sert à identifier la personne lors de son inscription.' : undefined,
+          aide: !element ? t('adminReferentiel.userInvitationHelp') : undefined,
         },
-        { cle: 'telephone', libelle: 'Téléphone', type: 'tel' },
+        { cle: 'telephone', libelle: t('adminReferentiel.phone'), type: 'tel' },
         {
           cle: 'client_id',
-          libelle: 'Client rattaché',
+          libelle: t('adminReferentiel.client'),
           type: 'liste',
           options: portefeuille.clients.map((c) => ({
             valeur: c.id,
             libelle: c.raison_sociale,
           })),
-          aide: 'À renseigner uniquement pour un compte de rôle Client.',
+          aide: t('adminReferentiel.clientLinkHelp'),
           pleineLargeur: true,
         },
         ...(element && element.statut !== 'INVITE'
           ? [
               {
                 cle: 'statut',
-                libelle: 'Statut du compte',
+                libelle: t('adminReferentiel.accountStatus'),
                 type: 'liste' as const,
                 options: STATUTS_COMPTE,
-                aide: 'Suspendre coupe l’accès sans supprimer l’historique de saisie.',
+                aide: t('adminReferentiel.accountStatusHelp'),
               },
             ]
           : []),
@@ -408,10 +416,10 @@ export function SectionUtilisateurs({ portefeuille }: { portefeuille: Portefeuil
       valider={(v: ValeursFormulaire) => {
         const erreurs: string[] = []
         if (v.role === 'CLIENT' && !texte(v.client_id)) {
-          erreurs.push('Un compte de rôle Client doit être rattaché à un client.')
+          erreurs.push(t('adminReferentiel.clientRoleRequired'))
         }
         if (v.role !== 'CLIENT' && texte(v.client_id)) {
-          erreurs.push('Seul un compte de rôle Client peut être rattaché à un client.')
+          erreurs.push(t('adminReferentiel.clientRoleForbidden'))
         }
         return erreurs
       }}
@@ -423,10 +431,7 @@ export function SectionUtilisateurs({ portefeuille }: { portefeuille: Portefeuil
             role: texte(v.role) as Utilisateur['role'],
             clientId: texteOuNull(v.client_id),
           })
-          toast.succes(
-            'Invitation créée. Communiquez l’adresse e-mail à la personne concernée : ' +
-              'elle réclame son accès en s’inscrivant avec cette même adresse.',
-          )
+          toast.succes(t('adminReferentiel.userInvitationSuccess'))
         } else {
           await modifier('utilisateurs', element.id, {
             nom: texte(v.nom),
@@ -435,13 +440,13 @@ export function SectionUtilisateurs({ portefeuille }: { portefeuille: Portefeuil
             client_id: texteOuNull(v.client_id),
             ...(element.statut !== 'INVITE' ? { statut: texte(v.statut) } : {}),
           })
-          toast.succes('Utilisateur mis à jour.')
+          toast.succes(t('adminReferentiel.userUpdated'))
         }
         await portefeuille.recharger()
       }}
       onSupprimer={async (u) => {
         await supprimer('utilisateurs', u.id)
-        toast.succes('Utilisateur supprimé.')
+        toast.succes(t('adminReferentiel.userDeleted'))
         await portefeuille.recharger()
       }}
     />
@@ -455,6 +460,7 @@ export function SectionUtilisateurs({ portefeuille }: { portefeuille: Portefeuil
 export function SectionOrganisations({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
   const { profil } = useSession()
   const toast = useToast()
+  const { t } = useTranslation(['common', 'workflow'])
 
   // Une organisation ne gère jamais que son propre profil : la création
   // d'une nouvelle organisation se fait exclusivement via la page
@@ -463,34 +469,34 @@ export function SectionOrganisations({ portefeuille }: { portefeuille: Portefeui
 
   return (
     <CrudRessource<Organisation>
-      titre="Organisation"
-      description="Identité, langue, fuseau horaire et devise de votre organisation."
+      titre={t('adminReferentiel.organisationsTitle')}
+      description={t('adminReferentiel.organisationsDescription')}
       pasDeCreation
       elements={laMienne}
       rechercheDans={(o) => o.nom}
       libelleElement={(o) => o.nom}
       colonnes={[
-        { cle: 'nom', libelle: 'Nom', rendu: (o) => (
+        { cle: 'nom', libelle: t('adminReferentiel.name'), rendu: (o) => (
           <span className="font-medium text-ardoise-900">{o.nom}</span>
         ) },
-        { cle: 'plan', libelle: 'Plan', rendu: (o) => o.plan },
-        { cle: 'devise', libelle: 'Devise', rendu: (o) => o.devise, masquerMobile: true },
-        { cle: 'fuseau', libelle: 'Fuseau', rendu: (o) => o.fuseau, masquerMobile: true },
+        { cle: 'plan', libelle: t('adminReferentiel.plan'), rendu: (o) => o.plan },
+        { cle: 'devise', libelle: t('adminReferentiel.currency'), rendu: (o) => o.devise, masquerMobile: true },
+        { cle: 'fuseau', libelle: t('adminReferentiel.timezone'), rendu: (o) => o.fuseau, masquerMobile: true },
         {
           cle: 'statut',
-          libelle: 'Statut',
+          libelle: t('adminReferentiel.accountStatus'),
           rendu: (o) => (
             <span className={o.statut === 'ACTIF' ? 'text-emerald-600' : 'text-red-600'}>
-              {o.statut === 'ACTIF' ? 'Actif' : 'Suspendu'}
+              {o.statut === 'ACTIF' ? t('adminReferentiel.active') : t('adminReferentiel.inactive')}
             </span>
           ),
         },
       ]}
       champs={() => [
-        { cle: 'nom', libelle: 'Nom', type: 'texte', obligatoire: true },
+        { cle: 'nom', libelle: t('adminReferentiel.name'), type: 'texte', obligatoire: true },
         {
           cle: 'plan',
-          libelle: 'Plan',
+          libelle: t('adminReferentiel.plan'),
           type: 'liste',
           obligatoire: true,
           options: [
@@ -501,16 +507,16 @@ export function SectionOrganisations({ portefeuille }: { portefeuille: Portefeui
         },
         {
           cle: 'langue',
-          libelle: 'Langue',
+          libelle: t('adminReferentiel.language'),
           type: 'liste',
           options: [
-            { valeur: 'fr', libelle: 'Français' },
-            { valeur: 'en', libelle: 'Anglais' },
+            { valeur: 'fr', libelle: t('adminReferentiel.french') },
+            { valeur: 'en', libelle: t('adminReferentiel.english') },
           ],
         },
         {
           cle: 'devise',
-          libelle: 'Devise',
+          libelle: t('adminReferentiel.currency'),
           type: 'liste',
           obligatoire: true,
           options: [
@@ -519,8 +525,8 @@ export function SectionOrganisations({ portefeuille }: { portefeuille: Portefeui
             { valeur: 'CDF', libelle: 'Franc congolais (CDF)' },
           ],
         },
-        { cle: 'fuseau', libelle: 'Fuseau horaire', type: 'texte', obligatoire: true },
-        { cle: 'logo_url', libelle: 'Logo (URL)', type: 'texte', pleineLargeur: true },
+        { cle: 'fuseau', libelle: t('adminReferentiel.timezone'), type: 'texte', obligatoire: true },
+        { cle: 'logo_url', libelle: t('adminReferentiel.logoUrl'), type: 'texte', pleineLargeur: true },
         {
           cle: 'statut',
           libelle: 'Statut',
@@ -552,7 +558,7 @@ export function SectionOrganisations({ portefeuille }: { portefeuille: Portefeui
           logo_url: texteOuNull(v.logo_url),
           statut: texte(v.statut),
         })
-        toast.succes('Organisation mise à jour.')
+        toast.succes(t('adminReferentiel.organisationUpdated'))
         await portefeuille.recharger()
       }}
     />

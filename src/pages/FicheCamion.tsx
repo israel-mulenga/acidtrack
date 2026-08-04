@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -47,6 +48,7 @@ import { ModaleIncident } from '@/components/ModaleIncident'
 import { useToast } from '@/components/Toast'
 
 export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
+  const { t } = useTranslation(['common', 'workflow'])
   const { id } = useParams<{ id: string }>()
   const { peut, estClient } = useSession()
   const profil = useUtilisateur()
@@ -78,13 +80,13 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
     return (
       <EtatVide
         icone={<Truck className="size-10" />}
-        titre="Dossier camion introuvable"
-        description="Ce dossier n’existe pas ou ne fait pas partie de votre périmètre."
+        titre={t('truckDetail.notFound.title')}
+        description={t('truckDetail.notFound.description')}
         action={
           <Link to="/">
             <Bouton variante="secondaire">
               <ArrowLeft className="size-4" />
-              Retour
+              {t('actions.back')}
             </Bouton>
           </Link>
         }
@@ -175,7 +177,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
               <BadgeCamion statut={camion.statut} />
               {enRetard && camion.statut !== 'BLOQUE' && (
                 <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-200">
-                  Retard {depassementSla(camion, referentiel)} h
+                  {t('truckDetail.delay', { hours: depassementSla(camion, referentiel) })}
                 </span>
               )}
             </div>
@@ -204,24 +206,24 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
         {/* Bandeau d'informations */}
         <dl className="grid grid-cols-2 gap-px border-t border-ardoise-200 bg-ardoise-200 sm:grid-cols-4">
           <Info
-            libelle="Position"
+            libelle={t('truckDetail.info.position')}
             valeur={camion.derniere_position_lib ?? '—'}
             detail={depuis(camion.derniere_maj_at)}
             icone={<MapPin className="size-3.5" />}
           />
           <Info
-            libelle="ETA"
+            libelle={t('truckDetail.info.eta')}
             valeur={camion.eta ? formatDateHeure(camion.eta) : '—'}
             detail={camion.eta ? jusqua(camion.eta) : undefined}
           />
           <Info
-            libelle="Chauffeur"
+            libelle={t('truckDetail.info.driver')}
             valeur={camion.chauffeur_nom ?? '—'}
             detail={estClient ? undefined : (camion.chauffeur_tel ?? undefined)}
             icone={<User className="size-3.5" />}
           />
           <Info
-            libelle="Plaques"
+            libelle={t('truckDetail.info.plates')}
             valeur={camion.plaque_tracteur}
             detail={camion.plaque_citerne ?? undefined}
             icone={<Truck className="size-3.5" />}
@@ -234,7 +236,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
         <a href={`tel:${camion.chauffeur_tel}`} className="block sm:hidden">
           <Bouton variante="secondaire" className="w-full">
             <Phone className="size-4" />
-            Appeler {camion.chauffeur_nom}
+            {t('truckDetail.callDriver', { name: camion.chauffeur_nom })}
           </Bouton>
         </a>
       )}
@@ -259,13 +261,13 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
       <Carte className="p-4 sm:p-5">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="font-semibold tracking-tight text-ardoise-900">
-            Chronologie du dossier
+            {t('truckDetail.timeline.title')}
           </h2>
           {peut('ouvrir_incident') && camion.statut !== 'TERMINE' && (
             <Bouton variante="secondaire" taille="sm" onClick={() => setIncidentOuvert(true)}>
               <ShieldAlert className="size-4" />
-              <span className="hidden sm:inline">Signaler un incident</span>
-              <span className="sm:hidden">Incident</span>
+              <span className="hidden sm:inline">{t('truckDetail.timeline.reportIncident')}</span>
+              <span className="sm:hidden">{t('truckDetail.timeline.incident')}</span>
             </Bouton>
           )}
         </div>
@@ -295,12 +297,12 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
       {/* Informations commerciales — jamais exposées au client */}
       {!estClient && commande && (
         <Carte className="p-4 sm:p-5">
-          <h2 className="mb-3 font-semibold tracking-tight text-ardoise-900">Rattachement</h2>
+          <h2 className="mb-3 font-semibold tracking-tight text-ardoise-900">{t('truckDetail.assignment.title')}</h2>
           <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-            <LigneInfo libelle="Commande" valeur={commande.reference} />
-            <LigneInfo libelle="Lot" valeur={lot.reference} />
-            <LigneInfo libelle="Transporteur" valeur={camion.transporteur ?? '—'} />
-            <LigneInfo libelle="Scellés" valeur={camion.numeros_scelles ?? '—'} />
+            <LigneInfo libelle={t('truckDetail.assignment.order')} valeur={commande.reference} />
+            <LigneInfo libelle={t('truckDetail.assignment.lot')} valeur={lot.reference} />
+            <LigneInfo libelle={t('truckDetail.assignment.carrier')} valeur={camion.transporteur ?? '—'} />
+            <LigneInfo libelle={t('truckDetail.assignment.seals')} valeur={camion.numeros_scelles ?? '—'} />
           </dl>
         </Carte>
       )}
@@ -345,7 +347,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
       <Modale
         ouverte={!!evenementARejeter}
         onFermer={() => setEvenementARejeter(null)}
-        titre="Rejeter la soumission"
+        titre={t('truckDetail.rejectModal.title')}
         sousTitre={`Étape ${evenementARejeter?.etape_numero} · ${camion.reference}`}
         pied={
           <div className="flex gap-2">
@@ -354,7 +356,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
               className="flex-1"
               onClick={() => setEvenementARejeter(null)}
             >
-              Annuler
+              {t('actions.cancel')}
             </Bouton>
             <Bouton
               variante="danger"
@@ -362,7 +364,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
               disabled={traitement || !motifRejet.trim()}
               onClick={() => void confirmerRejet()}
             >
-              Confirmer le rejet
+              {t('truckDetail.rejectModal.confirm')}
             </Bouton>
           </div>
         }
@@ -374,7 +376,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
           </Encart>
           <div>
             <label htmlFor="motif" className="mb-1.5 block text-sm font-medium text-ardoise-700">
-              Motif du rejet <span className="text-red-500">*</span>
+              {t('truckDetail.rejectModal.reason')} <span className="text-red-500">*</span>
             </label>
             <ZoneTexte
               id="motif"

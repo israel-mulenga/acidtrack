@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import {
   AlertTriangle,
@@ -34,6 +35,7 @@ import {
   pushEstSupporte,
 } from '@/lib/push'
 import { useToast } from './Toast'
+import { LanguageSwitcher } from '@/i18n/LanguageSwitcher'
 import {
   estAppareilIOS,
   estDejaInstallee,
@@ -51,6 +53,7 @@ const ICONE_ROLE: Record<string, ReactNode> = {
 
 /** Menu du compte connecté : déconnexion, et bascule démo en développement. */
 function MenuCompte() {
+  const { t } = useTranslation('common')
   const { session, profil, deconnecter, basculeDemoActive, basculerProfilDemo } = useSession()
   const installation = useInstallation()
   const toast = useToast()
@@ -80,23 +83,25 @@ function MenuCompte() {
       if (notifsActives) {
         await desactiverNotifications()
         setNotifsActives(false)
-        toast.succes('Notifications désactivées.')
+        toast.succes(t('accountMenu.notificationsDisable'))
         return
       }
       const authId = profil.auth_id ?? session?.user.id
       if (!authId) {
-        toast.erreur('Session incomplète : reconnectez-vous pour activer les notifications.')
+        toast.erreur(t('accountMenu.notificationsDisabled', { defaultValue: 'Session incomplète : reconnectez-vous pour activer les notifications.' }))
         return
       }
       const active = await activerNotifications(profil.organisation_id, authId, profil.id)
       if (active) {
         setNotifsActives(true)
-        toast.succes('Notifications activées pour cette organisation.')
+        toast.succes(t('accountMenu.notificationsEnabled'))
       } else {
-        toast.erreur('Permission de notification refusée par le navigateur.')
+        toast.erreur(t('accountMenu.notificationsDisabled'))
       }
     } catch (e) {
-      toast.erreur(e instanceof Error ? e.message : 'Activation des notifications impossible.')
+      toast.erreur(
+        e instanceof Error ? e.message : t('accountMenu.notificationsDisabled', { defaultValue: 'Activation des notifications impossible.' }),
+      )
     } finally {
       setNotifsEnCours(false)
     }
@@ -126,7 +131,10 @@ function MenuCompte() {
       return
     }
     toast.succes(
-      'Ouvrez le menu de votre navigateur (⋮ ou icône de partage) puis choisissez « Installer l’application » ou « Ajouter à l’écran d’accueil ».',
+      t('accountMenu.installHint', {
+        defaultValue:
+          'Ouvrez le menu de votre navigateur (⋮ ou icône de partage) puis choisissez « Installer l’application » ou « Ajouter à l’écran d’accueil ».',
+      }),
     )
   }
 
@@ -164,7 +172,7 @@ function MenuCompte() {
             {basculeDemoActive && (
               <>
                 <p className="border-b border-ardoise-100 bg-ardoise-50 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-ardoise-500">
-                  Bascule démo (développement)
+                  {t('accountMenu.demoSwitch')}
                 </p>
                 {PROFILS.map((p) => (
                   <button
@@ -205,12 +213,12 @@ function MenuCompte() {
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block">
-                    {notifsActives ? 'Désactiver les notifications' : 'Activer les notifications'}
+                    {notifsActives ? t('accountMenu.notificationsDisable') : t('accountMenu.notificationsEnable')}
                   </span>
                   <span className="block truncate text-xs font-normal text-ardoise-400">
                     {notifsActives
-                      ? 'Alertes push activées sur cet appareil'
-                      : 'Être alerté des changements de l’organisation'}
+                      ? t('accountMenu.notificationsEnabled')
+                      : t('accountMenu.notificationsDisabled')}
                   </span>
                 </span>
               </button>
@@ -223,16 +231,16 @@ function MenuCompte() {
                 <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-ardoise-100 text-ardoise-600">
                   <Download className="size-4" />
                 </span>
-                Installer l’application
+                {t('accountMenu.installApp')}
               </button>
             )}
             {instructionsIOS && (
               <div className="border-t border-ardoise-100 bg-ardoise-900 p-3.5">
                 <div className="mb-3 flex items-start justify-between gap-3">
-                  <p className="text-sm font-semibold text-white">Ajouter à l’écran d’accueil</p>
+                  <p className="text-sm font-semibold text-white">{t('accountMenu.installIosTitle')}</p>
                   <button
                     onClick={() => setInstructionsIOS(false)}
-                    aria-label="Fermer"
+                    aria-label={t('accountMenu.close')}
                     className="rounded-lg p-1 text-ardoise-400 transition-colors hover:bg-ardoise-800 hover:text-white"
                   >
                     <X className="size-4" />
@@ -246,7 +254,7 @@ function MenuCompte() {
               className="flex w-full items-center gap-3 border-t border-ardoise-100 px-3 py-2.5 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
             >
               <LogOut className="size-4" />
-              Se déconnecter
+              {t('accountMenu.logout')}
             </button>
           </div>
         </>
@@ -271,6 +279,7 @@ export function Coquille({
 }) {
   const { estClient } = useSession()
   const { pathname } = useLocation()
+  const { t } = useTranslation('common')
   const toast = useToast()
 
   // Complément in-app aux notifications push : un toast pour les
@@ -293,11 +302,14 @@ export function Coquille({
                 AcidTrack
               </p>
               <p className="hidden truncate text-[11px] leading-tight text-ardoise-400 sm:block">
-                {estClient ? 'Portail client' : 'Corridor Zambie → RDC'}
+                {estClient ? t('navigation.clientPortal') : t('navigation.corridor')}
               </p>
             </div>
           </div>
-          <MenuCompte />
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher className="hidden sm:flex" />
+            <MenuCompte />
+          </div>
         </div>
 
         {/* Navigation desktop */}
@@ -372,22 +384,28 @@ export function Coquille({
 
 /** Bandeau discret indiquant que les données sont vivantes. */
 export function IndicateurTempsReel() {
+  const { t } = useTranslation('common')
   return (
     <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-ardoise-400">
       <Radio className="size-3 text-emerald-500" />
-      Synchronisé en temps réel
+      {t('realtimeSync', { defaultValue: 'Synchronisé en temps réel' })}
     </span>
   )
 }
 
 export function BandeauAlerte({ nombre }: { nombre: number }) {
+  const { t } = useTranslation('common')
   if (nombre === 0) return null
   return (
     <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
       <AlertTriangle className="size-4 shrink-0" />
       <span>
         <strong className="font-semibold">{nombre}</strong>{' '}
-        {nombre > 1 ? 'camions nécessitent' : 'camion nécessite'} une attention immédiate.
+        {t('alerts.urgent', {
+          defaultValue: nombre > 1 ? 'camions nécessitent' : 'camion nécessite',
+          count: nombre,
+        })}{' '}
+        {t('alerts.immediateAttention', { defaultValue: 'une attention immédiate.' })}
       </span>
     </div>
   )
