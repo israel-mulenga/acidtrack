@@ -59,6 +59,55 @@
     "incidentOpen": "Critical incident open",
     "delayExceeded": "Step delay exceeded by {{hours}} h"
   },
+  "utils": {
+    "now": "just now",
+    "minute_one": "{{count}} min",
+    "minute_other": "{{count}} min",
+    "hour_one": "{{count}} h",
+    "hour_other": "{{count}} h",
+    "day_one": "{{count}} d",
+    "day_other": "{{count}} d",
+    "ago": "{{duration}} ago",
+    "in": "in {{duration}}",
+    "overdue": "overdue by {{duration}}"
+  },
+  "truckDetail": {
+    "notFound": {
+      "title": "Truck file not found",
+      "description": "The requested truck file does not exist or is no longer accessible."
+    },
+    "delay": "Delayed by {{hours}} h",
+    "info": {
+      "position": "Position",
+      "eta": "ETA",
+      "driver": "Driver",
+      "plates": "Plates"
+    },
+    "callDriver": "Call {{name}}",
+    "timeline": {
+      "title": "Timeline",
+      "reportIncident": "Report an incident",
+      "incident": "Incident"
+    },
+    "assignment": {
+      "title": "Commercial information",
+      "order": "Order",
+      "lot": "Lot",
+      "carrier": "Carrier",
+      "seals": "Seal numbers"
+    },
+    "rejectModal": {
+      "title": "Reject submission",
+      "confirm": "Confirm rejection",
+      "reason": "Rejection reason",
+      "placeholder": "E.g.: declaration number does not match attached receipt."
+    },
+    "toast": {
+      "approved": "Step {{step}} approved. The truck moves forward.",
+      "rejected": "Submission rejected. The author must resume the step.",
+      "incidentResolved": "Incident resolved, truck is unblocked."
+    }
+  },
   "truckBatch": {
     "title": "Add truck files",
     "transporteur": "Carrier",
@@ -131,7 +180,9 @@
       "blockedTrucks": "Blocked trucks"
     },
     "validationQueue": {
-      "title": "Validation queue"
+      "title": "Validation queue",
+      "itemTitle": "{{reference}} — step {{step}}",
+      "itemDetails": "{{stepLabel}} · submitted by {{author}} {{time}}"
     },
     "exceptions": {
       "title": "Exceptions to handle"
@@ -143,6 +194,7 @@
       "title": "Lots",
       "truckCount_one": "{{count}} truck",
       "truckCount_other": "{{count}} trucks",
+      "deliveredSummary": "{{delivered}} / {{planned}} delivered",
       "blocked": "Blocked",
       "weightedProgress": "Weighted progress"
     },
@@ -152,6 +204,19 @@
     "empty": {
       "title": "No active trucks",
       "description": "No trucks are currently tracked on this dashboard."
+    }
+  },
+  "clientPortal": {
+    "title": "My deliveries",
+    "summary": "{{trucks}} tracked trucks · {{lots}} lot{{s}}",
+    "empty": {
+      "title": "No deliveries in progress",
+      "description": "Your orders will appear here as soon as they enter production."
+    },
+    "readOnlyNotice": "Read-only view. Information is updated by our team at each completed step.",
+    "kpi": {
+      "toWatch": "To watch",
+      "nextArrival": "Next arrival"
     }
   },
   "lotDetail": {
@@ -166,6 +231,7 @@
     },
     "summary": {
       "delivered": "Delivered",
+      "deliveredSummary": "{{delivered}} / {{planned}} delivered",
       "trucks": "Trucks",
       "expected": "expected · {{count}}",
       "tonnage": "Tonnage",
@@ -175,6 +241,19 @@
       "toDate": "until {{date}}"
     },
     "empty": "No trucks in this lot yet."
+  },
+  "tasks": {
+    "summary": "{{count}} truck to process",
+    "toProcess": {
+      "title": "To process"
+    },
+    "pendingValidation": {
+      "title": "Pending validation"
+    },
+    "empty": {
+      "title": "No tasks",
+      "description": "No trucks are waiting for action right now."
+    }
   },
   "adminCommercial": {
     "order": "Order",
@@ -250,6 +329,7 @@
     "step": "Step",
     "responsible": "Responsible",
     "sla": "SLA",
+    "objective": "Objective",
     "blockingDocuments": "Blocking documents",
     "none": "None",
     "stepCountWarning": "This model has {{count}} step{{plural}} out of 7. Lots using it will not advance beyond the last defined step.",

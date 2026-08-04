@@ -59,6 +59,55 @@
     "incidentOpen": "Incident critique ouvert",
     "delayExceeded": "Délai de l’étape dépassé de {{hours}} h"
   },
+  "utils": {
+    "now": "à l'instant",
+    "minute_one": "{{count}} min",
+    "minute_other": "{{count}} min",
+    "hour_one": "{{count}} h",
+    "hour_other": "{{count}} h",
+    "day_one": "{{count}} j",
+    "day_other": "{{count}} j",
+    "ago": "il y a {{duration}}",
+    "in": "dans {{duration}}",
+    "overdue": "dépassée de {{duration}}"
+  },
+  "truckDetail": {
+    "notFound": {
+      "title": "Dossier introuvable",
+      "description": "Le dossier camion demandé n’existe pas ou n’est plus accessible."
+    },
+    "delay": "Retard de {{hours}} h",
+    "info": {
+      "position": "Position",
+      "eta": "ETA",
+      "driver": "Chauffeur",
+      "plates": "Plaque"
+    },
+    "callDriver": "Appeler {{name}}",
+    "timeline": {
+      "title": "Chronologie",
+      "reportIncident": "Signaler un incident",
+      "incident": "Incident"
+    },
+    "assignment": {
+      "title": "Informations commerciales",
+      "order": "Commande",
+      "lot": "Lot",
+      "carrier": "Transporteur",
+      "seals": "Numéros de scellés"
+    },
+    "rejectModal": {
+      "title": "Rejeter la soumission",
+      "confirm": "Confirmer le rejet",
+      "reason": "Motif du rejet",
+      "placeholder": "Ex. : le numéro de déclaration ne correspond pas à la quittance jointe."
+    },
+    "toast": {
+      "approved": "Étape {{step}} approuvée. Le camion progresse.",
+      "rejected": "Soumission rejetée. L’auteur doit reprendre l’étape.",
+      "incidentResolved": "Incident résolu, le camion est débloqué."
+    }
+  },
   "truckBatch": {
     "title": "Ajouter des dossiers camions",
     "transporteur": "Transporteur",
@@ -131,7 +180,9 @@
       "blockedTrucks": "Camions bloqués"
     },
     "validationQueue": {
-      "title": "File de validation"
+      "title": "File de validation",
+      "itemTitle": "{{reference}} — étape {{step}}",
+      "itemDetails": "{{stepLabel}} · soumis par {{author}} {{time}}"
     },
     "exceptions": {
       "title": "Exceptions à traiter"
@@ -143,6 +194,7 @@
       "title": "Lots",
       "truckCount_one": "{{count}} camion",
       "truckCount_other": "{{count}} camions",
+      "deliveredSummary": "{{delivered}} / {{planned}} livré",
       "blocked": "Bloqué",
       "weightedProgress": "Progression pondérée"
     },
@@ -152,6 +204,19 @@
     "empty": {
       "title": "Aucun camion en cours",
       "description": "Aucun camion n’est actuellement suivi sur ce tableau de bord."
+    }
+  },
+  "clientPortal": {
+    "title": "Mes livraisons",
+    "summary": "{{trucks}} camions suivis · {{lots}} lot{{s}}",
+    "empty": {
+      "title": "Aucune livraison en cours",
+      "description": "Vos commandes apparaîtront ici dès leur mise en production."
+    },
+    "readOnlyNotice": "Vue en lecture seule. Les informations sont mises à jour par nos équipes à chaque étape franchie.",
+    "kpi": {
+      "toWatch": "À surveiller",
+      "nextArrival": "Prochaine arrivée"
     }
   },
   "lotDetail": {
@@ -166,6 +231,7 @@
     },
     "summary": {
       "delivered": "Livré",
+      "deliveredSummary": "{{delivered}} / {{planned}} livré",
       "trucks": "Camions",
       "expected": "prévu · {{count}}",
       "tonnage": "Tonnage",
@@ -175,6 +241,19 @@
       "toDate": "jusqu’au {{date}}"
     },
     "empty": "Aucun camion dans ce lot pour le moment."
+  },
+  "tasks": {
+    "summary": "{{count}} camion à traiter",
+    "toProcess": {
+      "title": "À traiter"
+    },
+    "pendingValidation": {
+      "title": "En attente de validation"
+    },
+    "empty": {
+      "title": "Aucune tâche",
+      "description": "Aucun camion n’attend d’action pour le moment."
+    }
   },
   "adminCommercial": {
     "order": "Commande",
@@ -250,6 +329,7 @@
     "step": "Étape",
     "responsible": "Responsable",
     "sla": "SLA",
+    "objective": "Objectif",
     "blockingDocuments": "Documents bloquants",
     "none": "Aucun",
     "stepCountWarning": "Ce modèle compte {{count}} étape{{plural}} sur 7. Les dossiers qui l’utilisent ne pourront pas aller au-delà de la dernière étape définie.",
