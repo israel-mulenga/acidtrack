@@ -109,7 +109,10 @@ export function VueLot({ portefeuille }: { portefeuille: PortefeuilleComplet }) 
               {t('lotDetail.summary.delivered')}
             </span>
             <span className="text-sm font-semibold tabular-nums text-ardoise-900">
-              {formatTonnage(livre)} / {formatTonnage(planifie)} livré
+              {t('lotDetail.summary.deliveredSummary', {
+                delivered: formatTonnage(livre),
+                planned: formatTonnage(planifie),
+              })}
             </span>
           </div>
           <Progression valeur={partLivree} className="mt-2 h-2" couleur="bg-emerald-500" />

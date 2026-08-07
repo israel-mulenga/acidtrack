@@ -111,7 +111,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
     setTraitement(true)
     try {
       await validerEvenement(evenement.id, camion, evenement.etape_numero, profil.nom)
-      toast.succes(`Étape ${evenement.etape_numero} approuvée. Le camion progresse.`)
+      toast.succes(t('truckDetail.toast.approved', { step: evenement.etape_numero }))
       await rafraichir()
     } catch (e) {
       toast.erreur(e instanceof ErreurMetier ? e.message : String(e))
@@ -125,7 +125,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
     setTraitement(true)
     try {
       await rejeterEvenement(evenementARejeter.id, camion.id, motifRejet, profil.nom)
-      toast.succes('Soumission rejetée. L’auteur doit reprendre l’étape.')
+      toast.succes(t('truckDetail.toast.rejected'))
       setEvenementARejeter(null)
       setMotifRejet('')
       await rafraichir()
@@ -140,7 +140,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
     setTraitement(true)
     try {
       await resoudreIncident(incident.id, resolution)
-      toast.succes('Incident résolu, le camion est débloqué.')
+      toast.succes(t('truckDetail.toast.incidentResolved'))
       await rafraichir()
     } catch (e) {
       toast.erreur(e instanceof ErreurMetier ? e.message : String(e))
@@ -382,7 +382,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
               id="motif"
               value={motifRejet}
               onChange={(e) => setMotifRejet(e.target.value)}
-              placeholder="Ex. : le numéro de déclaration ne correspond pas à la quittance jointe."
+              placeholder={t('truckDetail.rejectModal.placeholder')}
               autoFocus
             />
           </div>

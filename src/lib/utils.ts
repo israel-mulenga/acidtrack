@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import i18next from 'i18next'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -33,15 +34,20 @@ export function formatDate(iso: string | null | undefined): string {
 }
 
 /** « il y a 3 h », « il y a 2 j » — la fraîcheur est un KPI (§19). */
+function formatRelativeDuration(minutes: number): string {
+  if (minutes < 1) return i18next.t('utils.now')
+  if (minutes < 60) return i18next.t('utils.minute', { count: minutes })
+  const heures = Math.round(minutes / 60)
+  if (heures < 24) return i18next.t('utils.hour', { count: heures })
+  const jours = Math.round(heures / 24)
+  return i18next.t('utils.day', { count: jours })
+}
+
 export function depuis(iso: string | null | undefined): string {
   if (!iso) return '—'
   const minutes = Math.round((Date.now() - new Date(iso).getTime()) / 60000)
-  if (minutes < 1) return "à l'instant"
-  if (minutes < 60) return `il y a ${minutes} min`
-  const heures = Math.round(minutes / 60)
-  if (heures < 24) return `il y a ${heures} h`
-  const jours = Math.round(heures / 24)
-  return `il y a ${jours} j`
+  if (minutes < 1) return i18next.t('utils.now')
+  return i18next.t('utils.ago', { duration: formatRelativeDuration(minutes) })
 }
 
 /** « dans 3 h » / « en retard de 2 h » pour l'ETA. */
@@ -49,8 +55,10 @@ export function jusqua(iso: string | null | undefined): string {
   if (!iso) return '—'
   const minutes = Math.round((new Date(iso).getTime() - Date.now()) / 60000)
   const abs = Math.abs(minutes)
-  const suffixe = abs < 60 ? `${abs} min` : abs < 1440 ? `${Math.round(abs / 60)} h` : `${Math.round(abs / 1440)} j`
-  return minutes >= 0 ? `dans ${suffixe}` : `dépassée de ${suffixe}`
+  const suffixe = abs < 60 ? i18next.t('utils.minute', { count: abs }) : abs < 1440 ? i18next.t('utils.hour', { count: Math.round(abs / 60) }) : i18next.t('utils.day', { count: Math.round(abs / 1440) })
+  return minutes >= 0
+    ? i18next.t('utils.in', { duration: suffixe })
+    : i18next.t('utils.overdue', { duration: suffixe })
 }
 
 /* ------------------------------------------------------------------ */
