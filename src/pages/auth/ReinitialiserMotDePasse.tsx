@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Container, Loader2 } from 'lucide-react'
 import { definirNouveauMotDePasse } from '@/lib/auth'
 import { Bouton, Carte, Champ, Encart, Etiquette } from '@/components/ui'
+import { LanguageSwitcher } from '@/i18n/LanguageSwitcher'
 
 export function ReinitialiserMotDePasse() {
   const navigate = useNavigate()
@@ -30,8 +31,11 @@ export function ReinitialiserMotDePasse() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-ardoise-50 px-4">
+    <div className="flex min-h-dvh items-center justify-center bg-ardoise-50 px-4 py-6">
       <div className="w-full max-w-sm space-y-5">
+        <div className="flex justify-end">
+          <LanguageSwitcher className="shadow-sm" />
+        </div>
         <div className="flex flex-col items-center gap-2">
           <span className="grid size-11 place-items-center rounded-xl bg-ardoise-900">
             <Container className="size-6 text-ambre-500" strokeWidth={2.5} />

@@ -307,7 +307,7 @@ export function Coquille({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher className="hidden sm:flex" />
+            <LanguageSwitcher className="shrink-0" />
             <MenuCompte />
           </div>
         </div>
