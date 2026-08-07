@@ -9,6 +9,7 @@
  */
 
 import { Eye, Package, Truck } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { PortefeuilleComplet } from '@/hooks/useDonnees'
 import { useUtilisateur } from '@/session'
 import { progressionLot, tonnage } from '@/lib/workflow'
@@ -18,6 +19,7 @@ import { CarteCamion } from '@/components/CarteCamion'
 import { IndicateurTempsReel } from '@/components/Coquille'
 
 export function PortailClient({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
+  const { t } = useTranslation(['common', 'workflow'])
   const profil = useUtilisateur()
 
   if (portefeuille.chargement) {
@@ -60,8 +62,8 @@ export function PortailClient({ portefeuille }: { portefeuille: PortefeuilleComp
     return (
       <EtatVide
         icone={<Package className="size-10" />}
-        titre="Aucune livraison en cours"
-        description="Vos commandes apparaîtront ici dès leur mise en production."
+        titre={t('clientPortal.empty.title')}
+        description={t('clientPortal.empty.description')}
       />
     )
   }
@@ -71,40 +73,43 @@ export function PortailClient({ portefeuille }: { portefeuille: PortefeuilleComp
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-lg font-semibold tracking-tight text-ardoise-900">
-            {client?.raison_sociale ?? 'Mes livraisons'}
+            {client?.raison_sociale ?? t('clientPortal.title')}
           </h1>
           <p className="text-sm text-ardoise-500">
-            {actifs.length} camions suivis · {lots.length} lot{lots.length > 1 ? 's' : ''}
+            {t('clientPortal.summary', {
+              trucks: actifs.length,
+              lots: lots.length,
+              s: lots.length > 1 ? 's' : '',
+            })}
           </p>
         </div>
         <IndicateurTempsReel />
       </div>
 
       <Encart ton="info" icone={<Eye className="size-4" />}>
-        Vue en lecture seule. Les informations sont mises à jour par nos équipes à chaque étape
-        franchie.
+        {t('clientPortal.readOnlyNotice')}
       </Encart>
 
       {/* Indicateurs client (§9.1) */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Statistique
-          libelle="Tonnage en transit"
+          libelle={t('dashboard.kpi.inTransitTonnage')}
           valeur={formatTonnage(tonnage(enTransit))}
           icone={<Truck className="size-4" />}
         />
         <Statistique
-          libelle="Tonnage livré"
+          libelle={t('dashboard.kpi.deliveredTonnage')}
           valeur={formatTonnage(tonnage(livres))}
           ton="succes"
           icone={<Package className="size-4" />}
         />
         <Statistique
-          libelle="À surveiller"
+          libelle={t('clientPortal.kpi.toWatch')}
           valeur={aSurveiller.length}
           ton={aSurveiller.length > 0 ? 'alerte' : 'neutre'}
         />
         <Statistique
-          libelle="Prochaine arrivée"
+          libelle={t('clientPortal.kpi.nextArrival')}
           valeur={prochaine?.eta ? formatDateHeure(prochaine.eta) : '—'}
         />
       </div>

@@ -122,11 +122,17 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
                   >
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-medium text-ardoise-900">
-                        {camion.reference} — étape {evenement.etape_numero}
+                        {t('dashboard.validationQueue.itemTitle', {
+                          reference: camion.reference,
+                          step: evenement.etape_numero,
+                        })}
                       </span>
                       <span className="block truncate text-xs text-ardoise-500">
-                        {etape?.libelle} · soumis par {evenement.auteur_nom}{' '}
-                        {depuis(evenement.created_at)}
+                        {t('dashboard.validationQueue.itemDetails', {
+                          stepLabel: etape?.libelle ?? '',
+                          author: evenement.auteur_nom,
+                          time: depuis(evenement.created_at),
+                        })}
                       </span>
                     </span>
                     <ArrowRight className="size-4 shrink-0 text-ardoise-300" />
@@ -223,7 +229,10 @@ export function TourDeControle({ portefeuille }: { portefeuille: PortefeuilleCom
                     </span>
                     <span>· {formatTonnage(tonnage(camionsLot))}</span>
                     <span className="font-medium text-emerald-600">
-                      · {formatTonnage(livre)} / {formatTonnage(lot.quantite_planifiee_t)} livré
+                      · {t('dashboard.lots.deliveredSummary', {
+                        delivered: formatTonnage(livre),
+                        planned: formatTonnage(lot.quantite_planifiee_t),
+                      })}
                     </span>
                     {camionsLot.some((c) => c.statut === 'BLOQUE') && (
                       <span className="font-medium text-red-600">· {t('dashboard.lots.blocked')}</span>
