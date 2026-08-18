@@ -20,16 +20,20 @@ import { Bouton, Champ, Encart, Etiquette, Modale } from './ui'
 interface Ligne {
   plaque_tracteur: string
   plaque_citerne: string
+  plaque_remorque_2: string
   chauffeur_nom: string
   chauffeur_tel: string
+  chauffeur_id_numero: string
   tonnage_net_t: string
 }
 
 const LIGNE_VIDE: Ligne = {
   plaque_tracteur: '',
   plaque_citerne: '',
+  plaque_remorque_2: '',
   chauffeur_nom: '',
   chauffeur_tel: '',
+  chauffeur_id_numero: '',
   tonnage_net_t: '',
 }
 
@@ -110,9 +114,11 @@ export function AssistantCamions({
       const gabarits: GabaritCamion[] = lignes.map((l) => ({
         plaque_tracteur: l.plaque_tracteur,
         plaque_citerne: l.plaque_citerne,
+        plaque_remorque_2: l.plaque_remorque_2,
         transporteur,
         chauffeur_nom: l.chauffeur_nom,
         chauffeur_tel: l.chauffeur_tel,
+        chauffeur_id_numero: l.chauffeur_id_numero,
         tonnage_net_t: Number(l.tonnage_net_t) || 0,
       }))
 
@@ -260,27 +266,39 @@ export function AssistantCamions({
                 <Champ
                   value={ligne.plaque_tracteur}
                   onChange={(e) => majLigne(index, 'plaque_tracteur', e.target.value)}
-                  placeholder="Plaque tracteur *"
-                  aria-label={`Plaque tracteur du camion ${index + 1}`}
+                  placeholder={t('truckBatch.plaqueTracteur')}
+                  aria-label={`${t('truckBatch.plaqueTracteur')} ${index + 1}`}
                 />
                 <Champ
                   value={ligne.plaque_citerne}
                   onChange={(e) => majLigne(index, 'plaque_citerne', e.target.value)}
-                  placeholder="Plaque citerne"
-                  aria-label={`Plaque citerne du camion ${index + 1}`}
+                  placeholder={t('truckBatch.plaqueCiterne')}
+                  aria-label={`${t('truckBatch.plaqueCiterne')} ${index + 1}`}
+                />
+                <Champ
+                  value={ligne.plaque_remorque_2}
+                  onChange={(e) => majLigne(index, 'plaque_remorque_2', e.target.value)}
+                  placeholder={t('truckBatch.plaqueRemorque2')}
+                  aria-label={`${t('truckBatch.plaqueRemorque2')} ${index + 1}`}
                 />
                 <Champ
                   value={ligne.chauffeur_nom}
                   onChange={(e) => majLigne(index, 'chauffeur_nom', e.target.value)}
-                  placeholder="Chauffeur"
-                  aria-label={`Chauffeur du camion ${index + 1}`}
+                  placeholder={t('truckBatch.chauffeurNom')}
+                  aria-label={`${t('truckBatch.chauffeurNom')} ${index + 1}`}
                 />
                 <Champ
                   type="tel"
                   value={ligne.chauffeur_tel}
                   onChange={(e) => majLigne(index, 'chauffeur_tel', e.target.value)}
-                  placeholder="Téléphone"
-                  aria-label={`Téléphone du camion ${index + 1}`}
+                  placeholder={t('truckBatch.chauffeurTel')}
+                  aria-label={`${t('truckBatch.chauffeurTel')} ${index + 1}`}
+                />
+                <Champ
+                  value={ligne.chauffeur_id_numero}
+                  onChange={(e) => majLigne(index, 'chauffeur_id_numero', e.target.value)}
+                  placeholder={t('truckBatch.chauffeurId')}
+                  aria-label={`${t('truckBatch.chauffeurId')} ${index + 1}`}
                 />
                 <Champ
                   type="number"
@@ -288,8 +306,8 @@ export function AssistantCamions({
                   step="0.01"
                   value={ligne.tonnage_net_t}
                   onChange={(e) => majLigne(index, 'tonnage_net_t', e.target.value)}
-                  placeholder="Tonnage net (t) *"
-                  aria-label={`Tonnage du camion ${index + 1}`}
+                  placeholder={t('truckBatch.tonnagePlaceholder')}
+                  aria-label={`${t('truckBatch.tonnagePlaceholder')} ${index + 1}`}
                   className="col-span-2"
                 />
               </div>
