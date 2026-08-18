@@ -1,0 +1,48 @@
+{
+  "preAlert": {
+    "title": "PRÉ-ALERTE : {{client}}",
+    "subtitle": "Référence camion : {{reference}} · Lot : {{lot}}",
+    "table": {
+      "number": "N°",
+      "information": "Informations nécessaires",
+      "details": "Détails"
+    },
+    "labels": {
+      "plateNumber": "Plate Number",
+      "trailerA": "Trailer A",
+      "trailerB": "Trailer B",
+      "productName": "Product Name",
+      "poNumber": "PO Number",
+      "driverName": "Driver Name",
+      "driverSurname": "Driver Surname",
+      "idNumber": "ID Number",
+      "client": "Client",
+      "transporter": "Transporter",
+      "expectedDepartureDate": "Expected Departure Date",
+      "destination": "Destination",
+      "deliveryType": "Delivery Type",
+      "grossMass": "Gross Mass",
+      "tareMass": "Tare Mass",
+      "netMass": "Net Mass",
+      "operatorName": "Operator Name"
+    },
+    "footer": "Document généré automatiquement par AcidTrack le {{date}}.",
+    "notProvided": "Not provided",
+    "notApplicable": "N/A"
+  },
+  "bundle": {
+    "title": "Synthèse documentaire",
+    "subtitle": "Camion {{reference}} · Plaque {{plate}}",
+    "generatedAt": "Généré le {{date}}",
+    "allPresent": "Tous les documents requis sont présents.",
+    "missing": "Documents manquants sur {{count}} étape(s).",
+    "step": "Étape {{number}} — {{label}}",
+    "requiredDocument": "Document requis",
+    "status": "Statut",
+    "file": "Fichier",
+    "present": "Présent",
+    "missingLabel": "Manquant",
+    "missingList": "Manquant(s) : {{documents}}",
+    "empty": "Aucun document requis pour cette étape."
+  }
+}
