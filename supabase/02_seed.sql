@@ -125,10 +125,10 @@ insert into utilisateurs (id, organisation_id, nom, role, email, telephone, clie
 -- ---------------------------------------------------------------------
 -- 3. Commande et lots
 -- ---------------------------------------------------------------------
-insert into commandes (id, organisation_id, client_id, reference, quantite_commandee_t,
+insert into commandes (id, organisation_id, client_id, reference, numero_facture, quantite_commandee_t,
                        prix_unitaire_usd, destination, conditions_paiement) values
 ('33333333-3333-3333-3333-333333333331', '11111111-1111-1111-1111-111111111111',
- '22222222-2222-2222-2222-222222222221', 'PO-2026-0060', 1500.00, 285.00,
+ '22222222-2222-2222-2222-222222222221', 'PO-2026-0060', '39213', 1500.00, 285.00,
  'Kolwezi / Lubumbashi', '30% à la commande, solde à 15 jours après livraison');
 
 insert into lots (id, organisation_id, commande_id, reference, corridor, destination,
@@ -143,45 +143,45 @@ insert into lots (id, organisation_id, commande_id, reference, corridor, destina
 -- ---------------------------------------------------------------------
 -- 4. Cinq dossiers camions sur cinq étapes différentes (AC-02)
 -- ---------------------------------------------------------------------
-insert into camions (id, organisation_id, lot_id, reference, plaque_tracteur, plaque_citerne,
-                     transporteur, chauffeur_nom, chauffeur_tel, capacite_t, tonnage_net_t,
+insert into camions (id, organisation_id, lot_id, reference, plaque_tracteur, plaque_citerne, plaque_remorque_2,
+                     transporteur, chauffeur_nom, chauffeur_tel, chauffeur_id_numero, capacite_t, tonnage_net_t,
                      numeros_scelles, etape_courante, statut, eta,
                      derniere_position_lat, derniere_position_lng, derniere_position_lib,
                      derniere_maj_at, derniere_maj_par) values
 
 -- Presque livré : arrivée mine en cours
 ('55555555-5555-5555-5555-555555555001', '11111111-1111-1111-1111-111111111111',
- '44444444-4444-4444-4444-444444444441', 'TRK-0060-01-01', 'ABT 4521 ZM', 'CIT 8890 ZM',
- 'Trans-Copperbelt Ltd', 'Moses Banda', '+260 977 220 145', 34.00, 32.50,
+ '44444444-4444-4444-4444-444444444441', 'TRK-0060-01-01', 'ABT 4521 ZM', 'CIT 8890 ZM', 'CIT 8891 ZM',
+ 'Trans-Copperbelt Ltd', 'Moses Banda', '+260 977 220 145', 'ZM-443071/61/1', 34.00, 32.50,
  'SC-88412 / SC-88413', 6, 'EN_COURS', now() + interval '3 hours',
  -10.7167, 25.4667, 'Mine KCC, Kolwezi', now() - interval '2 hours', 'Alain Tshibangu'),
 
 -- En attente de validation Ops sur la déclaration RDC (démo AC-04 : rejet)
 ('55555555-5555-5555-5555-555555555002', '11111111-1111-1111-1111-111111111111',
- '44444444-4444-4444-4444-444444444441', 'TRK-0060-01-02', 'ABT 7734 ZM', 'CIT 9012 ZM',
- 'Trans-Copperbelt Ltd', 'Chanda Mulenga', '+260 977 220 178', 32.00, 30.00,
+ '44444444-4444-4444-4444-444444444441', 'TRK-0060-01-02', 'ABT 7734 ZM', 'CIT 9012 ZM', null,
+ 'Trans-Copperbelt Ltd', 'Chanda Mulenga', '+260 977 220 178', 'ZM-443072/61/2', 32.00, 30.00,
  'SC-88420 / SC-88421', 4, 'EN_COURS', now() + interval '2 days',
  -12.2167, 27.7833, 'Frontière de Kasumbalesa (côté RDC)', now() - interval '5 hours', 'Alain Tshibangu'),
 
 -- Bloqué à la frontière (incident critique)
 ('55555555-5555-5555-5555-555555555003', '11111111-1111-1111-1111-111111111111',
- '44444444-4444-4444-4444-444444444441', 'TRK-0060-01-03', 'ABT 1190 ZM', 'CIT 4456 ZM',
- 'Zamlink Transport', 'Emmanuel Phiri', '+260 966 331 902', 32.00, 30.00,
+ '44444444-4444-4444-4444-444444444441', 'TRK-0060-01-03', 'ABT 1190 ZM', 'CIT 4456 ZM', null,
+ 'Zamlink Transport', 'Emmanuel Phiri', '+260 966 331 902', 'ZM-443073/61/3', 32.00, 30.00,
  'SC-88430 / SC-88431', 3, 'BLOQUE', now() + interval '4 days',
  -12.2500, 27.7900, 'Poste frontière de Kasumbalesa (côté Zambie)',
  now() - interval '19 hours', 'Alain Tshibangu'),
 
 -- En transit RDC, SLA dépassé (démo AC-05 : en retard)
 ('55555555-5555-5555-5555-555555555004', '11111111-1111-1111-1111-111111111111',
- '44444444-4444-4444-4444-444444444442', 'TRK-0060-02-01', 'ABT 6650 ZM', 'CIT 3321 ZM',
- 'Zamlink Transport', 'Jean-Pierre Kasongo', '+243 810 445 221', 34.00, 33.00,
+ '44444444-4444-4444-4444-444444444442', 'TRK-0060-02-01', 'ABT 6650 ZM', 'CIT 3321 ZM', null,
+ 'Zamlink Transport', 'Jean-Pierre Kasongo', '+243 810 445 221', 'CD-443074/61/4', 34.00, 33.00,
  'SC-88440 / SC-88441', 5, 'EN_COURS', now() + interval '6 hours',
  -11.6876, 27.5026, 'Péage de Lubumbashi', now() - interval '31 hours', 'Jean-Pierre Kasongo'),
 
 -- Tout début : chargement en Zambie
 ('55555555-5555-5555-5555-555555555005', '11111111-1111-1111-1111-111111111111',
- '44444444-4444-4444-4444-444444444442', 'TRK-0060-02-02', 'ABT 2287 ZM', 'CIT 7765 ZM',
- 'Trans-Copperbelt Ltd', 'Gift Simwanza', '+260 955 118 640', 30.00, 29.00,
+ '44444444-4444-4444-4444-444444444442', 'TRK-0060-02-02', 'ABT 2287 ZM', 'CIT 7765 ZM', null,
+ 'Trans-Copperbelt Ltd', 'Gift Simwanza', '+260 955 118 640', 'ZM-443075/61/5', 30.00, 29.00,
  'SC-88450 / SC-88451', 1, 'EN_COURS', now() + interval '5 days',
  -12.8100, 28.2100, 'Usine de Ndola, Zambie', now() - interval '45 minutes', 'Alain Tshibangu');
 
