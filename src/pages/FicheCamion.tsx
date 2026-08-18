@@ -9,12 +9,16 @@ import { Link, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
   ChevronLeft,
+  FileArchive,
+  FileDown,
+  Loader2,
   MapPin,
   Phone,
   ShieldAlert,
   Truck,
   User,
 } from 'lucide-react'
+import { genererBundleZip, genererPreAlertePdf, telechargerFichier } from '@/lib/documents'
 import type { EtapeEvenement, EtapeReferentiel, Incident } from '@/lib/types'
 import { useDossierCamion, type PortefeuilleComplet } from '@/hooks/useDonnees'
 import { useSession, useUtilisateur } from '@/session'
@@ -49,6 +53,7 @@ import { useToast } from '@/components/Toast'
 
 export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComplet }) {
   const { t } = useTranslation(['common', 'workflow'])
+  const { t: tDocs } = useTranslation('documents')
   const { id } = useParams<{ id: string }>()
   const { peut, estClient } = useSession()
   const profil = useUtilisateur()
@@ -60,10 +65,12 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
   const [motifRejet, setMotifRejet] = useState('')
   const [incidentOuvert, setIncidentOuvert] = useState(false)
   const [traitement, setTraitement] = useState(false)
+  const [generationDoc, setGenerationDoc] = useState<'prealerte' | 'bundle' | null>(null)
 
   const camion = portefeuille.camions.find((c) => c.id === id)
   const lot = portefeuille.lots.find((l) => l.id === camion?.lot_id)
   const commande = portefeuille.commandes.find((c) => c.id === lot?.commande_id)
+  const client = portefeuille.clients.find((c) => c.id === commande?.client_id)
   // Le référentiel dépend du modèle d'étapes rattaché au lot
   const referentiel = portefeuille.etapesDuLot(lot)
 
@@ -76,7 +83,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
     )
   }
 
-  if (!camion || !lot) {
+  if (!camion || !lot || !client) {
     return (
       <EtatVide
         icone={<Truck className="size-10" />}
@@ -149,6 +156,43 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
     }
   }
 
+  const telechargerPreAlerte = async () => {
+    if (!camion || !lot || !commande || !client) return
+    setGenerationDoc('prealerte')
+    try {
+      const evenementChargement = dossier.evenements
+        .filter((e) => e.etape_numero === 1 && e.statut === 'TERMINE')
+        .at(-1) || null
+      const blob = await genererPreAlertePdf({
+        camion,
+        lot,
+        commande,
+        client,
+        operateur: profil,
+        evenementChargement,
+        t: tDocs,
+      })
+      telechargerFichier(blob, `Pre-alerte-${camion.reference}.pdf`)
+    } catch (e) {
+      toast.erreur(e instanceof Error ? e.message : String(e))
+    } finally {
+      setGenerationDoc(null)
+    }
+  }
+
+  const telechargerBundle = async () => {
+    if (!camion || !lot || !commande || !client) return
+    setGenerationDoc('bundle')
+    try {
+      const blob = await genererBundleZip(camion, referentiel, dossier.documents, tDocs)
+      telechargerFichier(blob, `Dossier-${camion.reference}.zip`)
+    } catch (e) {
+      toast.erreur(e instanceof Error ? e.message : String(e))
+    } finally {
+      setGenerationDoc(null)
+    }
+  }
+
   /* --- Rendu -------------------------------------------------------- */
 
   return (
@@ -180,6 +224,38 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
                   {t('truckDetail.delay', { hours: depassementSla(camion, referentiel) })}
                 </span>
               )}
+              {!estClient && commande && (
+                <div className="mt-2 flex flex-wrap justify-end gap-2">
+                  <Bouton
+                    variante="secondaire"
+                    taille="sm"
+                    onClick={() => void telechargerPreAlerte()}
+                    disabled={generationDoc !== null}
+                  >
+                    {generationDoc === 'prealerte' ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <FileDown className="size-4" />
+                    )}
+                    <span className="hidden sm:inline">{t('truckDetail.actions.preAlert')}</span>
+                    <span className="sm:hidden">{t('truckDetail.actions.preAlertShort')}</span>
+                  </Bouton>
+                  <Bouton
+                    variante="secondaire"
+                    taille="sm"
+                    onClick={() => void telechargerBundle()}
+                    disabled={generationDoc !== null}
+                  >
+                    {generationDoc === 'bundle' ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <FileArchive className="size-4" />
+                    )}
+                    <span className="hidden sm:inline">{t('truckDetail.actions.bundle')}</span>
+                    <span className="sm:hidden">{t('truckDetail.actions.bundleShort')}</span>
+                  </Bouton>
+                </div>
+              )}
             </div>
           </div>
 
@@ -204,7 +280,7 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
         </div>
 
         {/* Bandeau d'informations */}
-        <dl className="grid grid-cols-2 gap-px border-t border-ardoise-200 bg-ardoise-200 sm:grid-cols-4">
+        <dl className="grid grid-cols-2 gap-px border-t border-ardoise-200 bg-ardoise-200 sm:grid-cols-3">
           <Info
             libelle={t('truckDetail.info.position')}
             valeur={camion.derniere_position_lib ?? '—'}
@@ -223,9 +299,20 @@ export function FicheCamion({ portefeuille }: { portefeuille: PortefeuilleComple
             icone={<User className="size-3.5" />}
           />
           <Info
+            libelle={t('truckDetail.info.driverId')}
+            valeur={camion.chauffeur_id_numero ?? '—'}
+            detail={estClient ? undefined : (camion.chauffeur_tel ?? undefined)}
+            icone={<User className="size-3.5" />}
+          />
+          <Info
             libelle={t('truckDetail.info.plates')}
             valeur={camion.plaque_tracteur}
             detail={camion.plaque_citerne ?? undefined}
+            icone={<Truck className="size-3.5" />}
+          />
+          <Info
+            libelle={t('truckDetail.info.trailerB')}
+            valeur={camion.plaque_remorque_2 ?? 'N/A'}
             icone={<Truck className="size-3.5" />}
           />
         </dl>

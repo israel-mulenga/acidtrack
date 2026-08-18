@@ -104,6 +104,7 @@ export function SectionCommandes({ portefeuille }: { portefeuille: PortefeuilleC
         },
         { cle: 'produit', libelle: t('adminCommercial.product'), type: 'texte', obligatoire: true },
         { cle: 'concentration', libelle: t('adminCommercial.concentration'), type: 'texte' },
+        { cle: 'numero_facture', libelle: t('adminCommercial.invoiceNumber'), type: 'texte' },
         {
           cle: 'quantite_commandee_t',
           libelle: t('adminCommercial.quantityOrdered'),
@@ -124,6 +125,7 @@ export function SectionCommandes({ portefeuille }: { portefeuille: PortefeuilleC
       valeursInitiales={(c) => ({
         client_id: c?.client_id ?? '',
         reference: c?.reference ?? prochaineReferenceCommande(portefeuille.commandes),
+        numero_facture: c?.numero_facture ?? '',
         produit: c?.produit ?? 'Acide sulfurique H2SO4',
         concentration: c?.concentration ?? '98%',
         quantite_commandee_t: c?.quantite_commandee_t?.toString() ?? '',
@@ -155,6 +157,7 @@ export function SectionCommandes({ portefeuille }: { portefeuille: PortefeuilleC
           organisation_id: profil.organisation_id,
           client_id: texte(v.client_id),
           reference: texte(v.reference),
+          numero_facture: texteOuNull(v.numero_facture),
           produit: texte(v.produit),
           concentration: texteOuNull(v.concentration),
           quantite_commandee_t: Number(v.quantite_commandee_t),

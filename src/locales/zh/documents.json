@@ -1,0 +1,48 @@
+{
+  "preAlert": {
+    "title": "预通知：{{client}}",
+    "subtitle": "卡车参考号：{{reference}} · 批次：{{lot}}",
+    "table": {
+      "number": "序号",
+      "information": "所需信息",
+      "details": "详情"
+    },
+    "labels": {
+      "plateNumber": "车牌号",
+      "trailerA": "拖车A",
+      "trailerB": "拖车B",
+      "productName": "产品名称",
+      "poNumber": "订单号",
+      "driverName": "司机名",
+      "driverSurname": "司机姓",
+      "idNumber": "证件号",
+      "client": "客户",
+      "transporter": "承运商",
+      "expectedDepartureDate": "预计出发日期",
+      "destination": "目的地",
+      "deliveryType": "交付类型",
+      "grossMass": "毛重",
+      "tareMass": "皮重",
+      "netMass": "净重",
+      "operatorName": "操作员"
+    },
+    "footer": "本文件由 AcidTrack 于 {{date}} 自动生成。",
+    "notProvided": "未提供",
+    "notApplicable": "不适用"
+  },
+  "bundle": {
+    "title": "文件包摘要",
+    "subtitle": "卡车 {{reference}} · 车牌 {{plate}}",
+    "generatedAt": "生成于 {{date}}",
+    "allPresent": "所有必需文件均已提供。",
+    "missing": "{{count}} 个步骤缺少文件。",
+    "step": "步骤 {{number}} — {{label}}",
+    "requiredDocument": "所需文件",
+    "status": "状态",
+    "file": "文件",
+    "present": "已提供",
+    "missingLabel": "缺失",
+    "missingList": "缺失：{{documents}}",
+    "empty": "此步骤无需文件。"
+  }
+}

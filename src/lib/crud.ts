@@ -152,9 +152,11 @@ export function controleTonnageCamion(
 export interface GabaritCamion {
   plaque_tracteur: string
   plaque_citerne?: string
+  plaque_remorque_2?: string
   transporteur?: string
   chauffeur_nom?: string
   chauffeur_tel?: string
+  chauffeur_id_numero?: string
   capacite_t?: number
   tonnage_net_t: number
 }
@@ -196,9 +198,11 @@ export async function creerCamionsEnSerie({
     reference: references[i],
     plaque_tracteur: gabarit.plaque_tracteur.trim(),
     plaque_citerne: gabarit.plaque_citerne?.trim() || null,
+    plaque_remorque_2: gabarit.plaque_remorque_2?.trim() || null,
     transporteur: gabarit.transporteur?.trim() || null,
     chauffeur_nom: gabarit.chauffeur_nom?.trim() || null,
     chauffeur_tel: gabarit.chauffeur_tel?.trim() || null,
+    chauffeur_id_numero: gabarit.chauffeur_id_numero?.trim() || null,
     capacite_t: gabarit.capacite_t || null,
     tonnage_net_t: gabarit.tonnage_net_t,
     etape_courante: 1,

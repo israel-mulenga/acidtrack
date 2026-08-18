@@ -122,6 +122,7 @@ export interface Commande {
   organisation_id: string
   client_id: string
   reference: string
+  numero_facture: string | null
   produit: string
   concentration: string | null
   quantite_commandee_t: number
@@ -155,9 +156,11 @@ export interface Camion {
   reference: string
   plaque_tracteur: string
   plaque_citerne: string | null
+  plaque_remorque_2: string | null
   transporteur: string | null
   chauffeur_nom: string | null
   chauffeur_tel: string | null
+  chauffeur_id_numero: string | null
   capacite_t: number | null
   tonnage_net_t: number
   numeros_scelles: string | null
