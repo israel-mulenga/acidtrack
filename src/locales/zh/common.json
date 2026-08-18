@@ -81,7 +81,15 @@
       "position": "位置",
       "eta": "预计到达",
       "driver": "司机",
-      "plates": "车牌"
+      "driverId": "司机证件号",
+      "plates": "车牌",
+      "trailerB": "拖车B"
+    },
+    "actions": {
+      "preAlert": "下载预通知",
+      "preAlertShort": "预通知",
+      "bundle": "下载文件包",
+      "bundleShort": "文件包"
     },
     "callDriver": "呼叫 {{name}}",
     "timeline": {
@@ -112,6 +120,12 @@
     "title": "添加卡车档案",
     "transporteur": "承运商",
     "transporteurPlaceholder": "应用到所有卡车",
+    "plaqueTracteur": "牵引车车牌 *",
+    "plaqueCiterne": "油罐车车牌",
+    "plaqueRemorque2": "拖车B",
+    "chauffeurNom": "司机姓名",
+    "chauffeurTel": "电话",
+    "chauffeurId": "司机证件号",
     "tonnageLabel": "每车吨位",
     "tonnagePlaceholder": "例如：30",
     "prepare": "准备",
@@ -267,6 +281,7 @@
     "destination": "目的地",
     "product": "产品",
     "concentration": "浓度",
+    "invoiceNumber": "发票编号",
     "quantityOrdered": "订购数量",
     "unitPrice": "单价",
     "origin": "来源",

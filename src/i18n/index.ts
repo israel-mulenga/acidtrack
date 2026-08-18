@@ -11,22 +11,28 @@ import zhAuth from '@/locales/zh/auth.json'
 import frWorkflow from '@/locales/fr/workflow.json'
 import enWorkflow from '@/locales/en/workflow.json'
 import zhWorkflow from '@/locales/zh/workflow.json'
+import frDocuments from '@/locales/fr/documents.json'
+import enDocuments from '@/locales/en/documents.json'
+import zhDocuments from '@/locales/zh/documents.json'
 
 const resources = {
   fr: {
     common: frCommon,
     auth: frAuth,
     workflow: frWorkflow,
+    documents: frDocuments,
   },
   en: {
     common: enCommon,
     auth: enAuth,
     workflow: enWorkflow,
+    documents: enDocuments,
   },
   zh: {
     common: zhCommon,
     auth: zhAuth,
     workflow: zhWorkflow,
+    documents: zhDocuments,
   },
 } as const
 

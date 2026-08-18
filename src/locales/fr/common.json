@@ -81,7 +81,15 @@
       "position": "Position",
       "eta": "ETA",
       "driver": "Chauffeur",
-      "plates": "Plaque"
+      "driverId": "N° identité chauffeur",
+      "plates": "Plaque",
+      "trailerB": "Remorque B"
+    },
+    "actions": {
+      "preAlert": "Télécharger le pré-alerte",
+      "preAlertShort": "Pré-alerte",
+      "bundle": "Télécharger le dossier",
+      "bundleShort": "Dossier"
     },
     "callDriver": "Appeler {{name}}",
     "timeline": {
@@ -112,6 +120,12 @@
     "title": "Ajouter des dossiers camions",
     "transporteur": "Transporteur",
     "transporteurPlaceholder": "Appliqué à tous les camions",
+    "plaqueTracteur": "Plaque tracteur *",
+    "plaqueCiterne": "Plaque citerne",
+    "plaqueRemorque2": "Remorque B",
+    "chauffeurNom": "Chauffeur",
+    "chauffeurTel": "Téléphone",
+    "chauffeurId": "N° identité chauffeur",
     "tonnageLabel": "Tonnage par camion",
     "tonnagePlaceholder": "Ex. : 30",
     "prepare": "Préparer",
@@ -267,6 +281,7 @@
     "destination": "Destination",
     "product": "Produit",
     "concentration": "Concentration",
+    "invoiceNumber": "N° de facture (Invoice No.)",
     "quantityOrdered": "Quantité commandée",
     "unitPrice": "Prix unitaire",
     "origin": "Origine",

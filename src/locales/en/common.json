@@ -81,7 +81,15 @@
       "position": "Position",
       "eta": "ETA",
       "driver": "Driver",
-      "plates": "Plates"
+      "driverId": "Driver ID",
+      "plates": "Plates",
+      "trailerB": "Trailer B"
+    },
+    "actions": {
+      "preAlert": "Download pre-alert",
+      "preAlertShort": "Pre-alert",
+      "bundle": "Download file bundle",
+      "bundleShort": "Bundle"
     },
     "callDriver": "Call {{name}}",
     "timeline": {
@@ -112,6 +120,12 @@
     "title": "Add truck files",
     "transporteur": "Carrier",
     "transporteurPlaceholder": "Applied to all trucks",
+    "plaqueTracteur": "Tractor plate *",
+    "plaqueCiterne": "Tanker plate",
+    "plaqueRemorque2": "Trailer B",
+    "chauffeurNom": "Driver name",
+    "chauffeurTel": "Phone",
+    "chauffeurId": "Driver ID",
     "tonnageLabel": "Tonnage per truck",
     "tonnagePlaceholder": "E.g. 30",
     "prepare": "Prepare",
@@ -267,7 +281,8 @@
     "destination": "Destination",
     "product": "Product",
     "concentration": "Concentration",
-    "quantityOrdered": "Ordered quantity",
+    "invoiceNumber": "Invoice number",
+    "quantityOrdered": "Quantity ordered",
     "unitPrice": "Unit price",
     "origin": "Origin",
     "paymentConditions": "Payment terms",
